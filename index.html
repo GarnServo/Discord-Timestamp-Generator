@@ -28,6 +28,8 @@
   "applicationCategory": "UtilitiesApplication",
   "operatingSystem": "Any",
   "description": "Generate Discord timestamp codes that display in each reader's own timezone. Pick a date, time and format, then copy the code.",
+  "url": "https://garnservo.github.io/Discord-Timestamp-Generator/",
+  "author": { "@type": "Person", "name": "garnservo", "url": "https://github.com/garnservo" },
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 }
 </script>
@@ -357,6 +359,40 @@
   }
   #current:hover{ border-color:#54565e; color:var(--text); }
 
+  .faq{
+    margin-top:1.5rem;
+    border:1px solid var(--border-subtle);
+    border-radius:var(--radius-md);
+    background:var(--bg-card);
+    overflow:hidden;
+  }
+  .faq summary{
+    cursor:pointer;
+    list-style:none;
+    padding:1rem 1.25rem;
+    font-weight:600;
+    font-size:.92rem;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+  }
+  .faq summary::-webkit-details-marker{ display:none; }
+  .faq-icon{
+    flex:none;
+    font-size:1.1rem;
+    color:var(--text-muted);
+    transition:transform .2s ease;
+    line-height:1;
+  }
+  .faq[open] .faq-icon{ transform:rotate(45deg); }
+  .faq-content{
+    padding:0 1.25rem 1.25rem;
+    color:var(--text-muted);
+    font-size:.9rem;
+  }
+  .faq-content p + p{ margin-top:.75rem; }
+
   footer{
     max-width:38rem;
     margin:2rem auto 0;
@@ -479,6 +515,15 @@
     </div>
   </form>
 
+  <details class="faq">
+    <summary>What are Discord timestamps, and why use them?<span class="faq-icon" aria-hidden="true">+</span></summary>
+    <div class="faq-content">
+      <p>A Discord timestamp isn't plain old text, it's a live timezone conversion. When you send <code>&lt;t:1786954860:D&gt;</code> in a message, Discord doesn't store the words "August 17, 2026." It stores a single point in time, then renders it in each reader's own timezone and language automatically. Someone in London and someone in Los Angeles see different clock times, but they're both looking at the same moment.</p>
+      <p>That matters most for anything time-sensitive in a server with people spread across timezones — event start times, deadlines, "see you at" messages. Typing "9pm" leaves everyone guessing whose 9pm you mean. A timestamp code removes the guesswork entirely.</p>
+      <p>The seven format options above control how it reads, not what time it represents: <strong>R</strong> gives a self-updating "in 3 hours" or "2 days ago," <strong>F</strong> spells out the full date and day of the week, and so on. Pick whichever fits the message, then paste the generated code straight into Discord.</p>
+    </div>
+  </details>
+
   <footer>
     Built for Discord's <a href="https://discord.com/developers/docs/reference#message-formatting-timestamp-styles" target="_blank" rel="noopener noreferrer">native timestamp tags</a>.
   </footer>
@@ -581,14 +626,21 @@
 
   copyBtn.addEventListener('click', async function(){
     updateOutput();
+    let succeeded = true;
     try {
       await navigator.clipboard.writeText(output.value);
     } catch (e) {
+      succeeded = false;
+      output.focus();
       output.select();
-      document.execCommand('copy');
     }
-    copyBtn.classList.add('copied');
-    copyLabel.textContent = 'Copied!';
+
+    if (succeeded){
+      copyBtn.classList.add('copied');
+      copyLabel.textContent = 'Copied!';
+    } else {
+      copyLabel.textContent = 'Press Ctrl/Cmd+C';
+    }
     clearTimeout(copyBtn._t);
     copyBtn._t = setTimeout(function(){
       copyBtn.classList.remove('copied');
