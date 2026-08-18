@@ -1,1408 +1,751 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Discord Timestamp Generator — Create &lt;t:...&gt; Codes</title>
-    <meta name="description" content="Generate Discord timestamp codes in seconds. Pick a date and time, choose a display format, and copy a <t:...> tag that shows correctly in everyone's own timezone.">
-    <meta name="theme-color" content="#1e1f22">
-    <meta name="color-scheme" content="dark light">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://garnservo.github.io/Discord-Timestamp-Generator/">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%235865f2'/%3E%3Ccircle cx='32' cy='34' r='16' fill='none' stroke='%23fff' stroke-width='4'/%3E%3Cpath d='M32 24v10l7 6' fill='none' stroke='%23fff' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-    <link rel="dns-prefetch" href="//discord.com">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discord Timestamp Generator — Create &lt;t:...&gt; Codes</title>
+<meta name="description" content="Generate Discord timestamp codes in seconds. Pick a date and time, choose a display format, and copy a <t:...> tag that shows correctly in everyone's own timezone.">
+<meta name="theme-color" content="#1e1f22" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f6f8" media="(prefers-color-scheme: light)">
+<meta name="color-scheme" content="dark light">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://garnservo.github.io/Discord-Timestamp-Generator/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%235865f2'/%3E%3Ccircle cx='32' cy='34' r='16' fill='none' stroke='%23fff' stroke-width='4'/%3E%3Cpath d='M32 24v10l7 6' fill='none' stroke='%23fff' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 
-    <!-- Prerender the linked Discord docs on mousedown (conservative
-         eagerness — avoids speculative fetches on stray hovers). -->
-    <script type="speculationrules">
-    {
-        "prerender": [{
-            "where": { "selector_matches": "footer a" },
-            "eagerness": "conservative"
-        }]
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Discord Timestamp Generator">
+<meta property="og:description" content="Pick a date and time, choose a format, and copy a Discord timestamp code that displays correctly for everyone, in their own timezone.">
+<meta property="og:url" content="https://garnservo.github.io/Discord-Timestamp-Generator/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Discord Timestamp Generator">
+<meta name="twitter:description" content="Pick a date and time, choose a format, and copy a Discord timestamp code that displays correctly for everyone, in their own timezone.">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Discord Timestamp Generator",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any",
+  "description": "Generate Discord timestamp codes that display in each reader's own timezone. Pick a date, time and format, then copy the code.",
+  "url": "https://garnservo.github.io/Discord-Timestamp-Generator/",
+  "author": { "@type": "Person", "name": "garnservo", "url": "https://github.com/garnservo" },
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+
+<style>
+  :root{
+    --bg:#1e1f22;
+    --bg-card:#2b2d31;
+    --bg-elevated:#313338;
+    --bg-input:#1e1f22;
+    --border:#3b3d43;
+    --border-subtle:#35373c;
+    --border-hover:#54565e;
+    --text:#f2f3f5;
+    --text-muted:#96989d;
+    --text-faint:#9fa1aa;
+    --brand:#5865f2;
+    --brand-hover:color-mix(in srgb, var(--brand) 80%, black);
+    --brand-soft:color-mix(in srgb, var(--brand) 16%, transparent);
+    --brand-soft-strong:color-mix(in srgb, var(--brand) 28%, transparent);
+    --brand-fg-strong:color-mix(in srgb, var(--brand) 40%, white);
+    --success:#23a55a;
+    --radius-lg:16px;
+    --radius-md:10px;
+    --radius-sm:7px;
+    --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI","gg sans","Noto Sans",Helvetica,Arial,sans-serif;
+    --font-mono:ui-monospace,"Cascadia Code","Source Code Pro",Menlo,Consolas,"Liberation Mono",monospace;
+    color-scheme: dark light;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f5f6f8;
+      --bg-card:#ffffff;
+      --bg-elevated:#f2f3f5;
+      --bg-input:#ffffff;
+      --border:#d8dade;
+      --border-subtle:#e3e5e8;
+      --border-hover:#b6b9c0;
+      --text:#06070a;
+      --text-muted:#4e5058;
+      --text-faint:#5c5e66;
+      /* Mixing brand toward white (dark-mode default) disappears on a
+         light background, so flip the mix toward black instead. */
+      --brand-fg-strong:color-mix(in srgb, var(--brand) 55%, black);
     }
-    </script>
+  }
 
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Discord Timestamp Generator">
-    <meta property="og:description" content="Pick a date and time, choose a format, and copy a Discord timestamp code that displays correctly for everyone, in their own timezone.">
-    <meta property="og:url" content="https://garnservo.github.io/Discord-Timestamp-Generator/">
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Discord Timestamp Generator">
-    <meta name="twitter:description" content="Pick a date and time, choose a format, and copy a Discord timestamp code that displays correctly for everyone, in their own timezone.">
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;overflow-anchor:none;}
+  button,input,select,textarea{ font:inherit; }
+  ::selection{ background:var(--brand-soft-strong); color:var(--text); }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-sans);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    min-height:100svh;
+    position:relative;
+    overflow-x:hidden;
+  }
 
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "Discord Timestamp Generator",
-        "applicationCategory": "UtilitiesApplication",
-        "operatingSystem": "Any",
-        "description": "Generate Discord timestamp codes that display in each reader's own timezone. Pick a date, time and format, then copy the code.",
-        "url": "https://garnservo.github.io/Discord-Timestamp-Generator/",
-        "author": { "@type": "Person", "name": "garnservo", "url": "https://github.com/garnservo" },
-        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
-    }
-    </script>
+  .sr-only{
+    position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+    overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+  }
+  .skip-link{
+    position:absolute;left:1rem;top:-3rem;background:var(--brand);color:#fff;
+    padding:.6rem 1rem;border-radius:var(--radius-sm);z-index:100;transition:top .15s ease;
+    text-decoration:none;font-weight:600;
+  }
+  .skip-link:focus{top:1rem;}
 
-    <style>
-        :root {
-            --bg: #1e1f22;
-            --bg-card: #2b2d31;
-            --bg-elevated: #313338;
-            --bg-input: #1e1f22;
-            --border: #3b3d43;
-            --border-hover: #54565e;
-            --border-subtle: #35373c;
-            --text: #f2f3f5;
-            --text-muted: #b9bbc1;
-            --text-faint: #b5b7be;
-            --brand: #5865f2;
-            --brand-hover: color-mix(in srgb, var(--brand) 80%, black);
-            --brand-fg-strong: color-mix(in srgb, var(--brand) 40%, white);
-            --brand-soft: color-mix(in srgb, var(--brand) 16%, transparent);
-            --brand-soft-strong: color-mix(in srgb, var(--brand) 28%, transparent);
-            --success: #23a55a;
-            --shadow-card: 0 20px 50px -25px color-mix(in srgb, var(--brand) 25%, black);
-            --radius-lg: 16px;
-            --radius-md: 10px;
-            --radius-sm: 7px;
-            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "gg sans", "Noto Sans", Helvetica, Arial, sans-serif;
-            --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "Liberation Mono", monospace;
-            color-scheme: dark light;
-            accent-color: var(--brand);
-            interpolate-size: allow-keywords;
-        }
+  :focus-visible{
+    outline:none;
+    box-shadow:0 0 0 2px var(--bg), 0 0 0 4px var(--brand);
+    border-radius:4px;
+  }
 
-        @media (prefers-color-scheme: light) {
-            :root {
-                --bg: #f7f7fa;
-                --bg-card: #ffffff;
-                --bg-elevated: #f2f3f5;
-                --bg-input: #ffffff;
-                --border: #d8dade;
-                --border-hover: #b6b9c0;
-                --border-subtle: #e3e5e8;
-                --text: #060607;
-                --text-muted: #4e5058;
-                --text-faint: #5c5e66;
-                /* Dark-mode `--brand-fg-strong` mixes brand with white,
-                   which vanishes on a light background. Flip the mix
-                   toward black so brand-tinted text stays readable. */
-                --brand-fg-strong: color-mix(in srgb, var(--brand) 55%, black);
-            }
-        }
+  /* Ambient glow */
+  .glow{
+    position:fixed;
+    width:60rem;height:60rem;
+    top:-30rem;left:50%;
+    transform:translateX(-50%);
+    background:radial-gradient(circle, var(--brand-soft) 0%, transparent 65%);
+    pointer-events:none;
+    z-index:0;
+    animation:drift 16s ease-in-out infinite;
+    will-change:transform;
+    contain:strict;
+  }
+  @media (max-width:32rem){ .glow{ display:none; } }
+  @keyframes drift{
+    0%,100%{ transform:translateX(-50%) translateY(0) scale(1); }
+    50%{ transform:translateX(-46%) translateY(2rem) scale(1.06); }
+  }
 
-        *, *::before, *::after { box-sizing: border-box; }
-        html, body { margin: 0; padding: 0; overflow-anchor: none; }
+  main{
+    position:relative;
+    z-index:1;
+    max-width:38rem;
+    margin:0 auto;
+    padding:3.5rem 1.25rem 4rem;
+  }
 
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: var(--font-sans);
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
-            min-height: 100svh;
-            position: relative;
-            overflow-x: hidden;
-        }
+  header.hero{
+    text-align:center;
+    margin-bottom:2.25rem;
+    animation:fadeUp .5s ease both;
+  }
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:.4rem;
+    font-size:.75rem;font-weight:600;letter-spacing:.03em;
+    color:var(--brand-fg-strong);
+    background:var(--brand-soft);
+    padding:.3rem .7rem;
+    border-radius:99px;
+    margin-bottom:1rem;
+  }
+  .eyebrow-dot{
+    width:.4rem;height:.4rem;border-radius:50%;background:var(--brand);
+    animation:pulseDot 2s ease-in-out infinite;
+  }
+  h1{
+    font-size:1.9rem;
+    margin:0 0 .6rem;
+    letter-spacing:-.01em;
+    font-weight:700;
+    text-wrap:balance;
+  }
+  .lede{
+    color:var(--text-muted);
+    margin:0 auto;
+    max-width:30rem;
+    font-size:.98rem;
+    text-wrap:balance;
+  }
 
-        button, input, select, textarea { font: inherit; }
+  /* Shared surface primitive: card / faq panel / mock message. */
+  .card, .faq, .message{
+    border:1px solid var(--border-subtle);
+    border-radius:var(--radius-md);
+    background:var(--bg-card);
+  }
+  .card{
+    border-radius:var(--radius-lg);
+    padding:1.75rem;
+    box-shadow:0 20px 50px -25px rgba(0,0,0,.6);
+    animation:fadeUp .5s .08s ease both;
+    contain:layout paint style;
+  }
 
-        main { outline: 0; }
-        :focus-visible {
-            outline: 0;
-            box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--brand);
-            border-radius: 4px;
-        }
+  .field-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:.9rem;
+    margin-bottom:1.25rem;
+  }
+  .field label{
+    display:block;
+    font-size:.78rem;
+    font-weight:600;
+    color:var(--text-muted);
+    margin-bottom:.4rem;
+  }
+  .field input[type="date"],
+  .field input[type="time"],
+  #code{
+    background:var(--bg-input);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+  }
+  .field input[type="date"],
+  .field input[type="time"]{
+    width:100%;
+    padding:.65rem .7rem;
+    font-family:var(--font-sans);
+    font-size:.92rem;
+    accent-color:var(--brand);
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .field input:hover{ border-color:var(--border-hover); }
+  .field input:focus, #code:focus, #tz:focus{
+    border-color:var(--brand);
+    box-shadow:0 0 0 3px var(--brand-soft);
+    outline:none;
+  }
 
-        ::selection { background: var(--brand-soft-strong); color: var(--text); }
+  fieldset{
+    border:0;
+    margin:0 0 1.5rem;
+    padding:0;
+  }
+  fieldset legend{
+    font-size:.78rem;
+    font-weight:600;
+    color:var(--text-muted);
+    padding:0;
+    margin-bottom:.55rem;
+  }
+  .pills{
+    display:flex;
+    flex-wrap:wrap;
+    gap:.5rem;
+  }
+  .pill-input{
+    position:absolute;
+    opacity:0;
+    width:1px;height:1px;
+  }
+  .pill{
+    display:flex;
+    flex-direction:column;
+    gap:.1rem;
+    cursor:pointer;
+    background:var(--bg-elevated);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    padding:.5rem .75rem;
+    transition:transform .12s ease, border-color .15s ease, background .15s ease;
+    user-select:none;
+  }
+  .pill-label{ font-size:.82rem; font-weight:600; }
+  .pill-example{ font-size:.72rem; color:var(--text-faint); font-family:var(--font-mono); }
+  .pill:hover{ border-color:var(--border-hover); transform:translateY(-1px); }
+  .pill-input:checked + .pill{
+    background:var(--brand-soft-strong);
+    border-color:var(--brand);
+  }
+  .pill-input:checked + .pill .pill-example{ color:var(--brand-fg-strong); }
+  .pill-input:focus-visible + .pill{ outline:2px solid var(--brand); outline-offset:2px; }
+  .pill:active{ transform:scale(.97); }
 
-        .sr-only {
-            position: absolute;
-            width: 1px; height: 1px;
-            padding: 0; margin: -1px;
-            overflow: hidden;
-            clip: rect(0,0,0,0);
-            white-space: nowrap;
-            border: 0;
-        }
+  /* Discord message preview */
+  .preview-block{
+    margin-bottom:1.5rem;
+  }
+  .preview-header{
+    display:flex;
+    align-items:center;
+    gap:.5rem;
+    margin-bottom:.55rem;
+  }
+  .preview-header > span{
+    font-size:.78rem;
+    font-weight:600;
+    color:var(--text-muted);
+    margin-right:auto;
+  }
+  #tz{
+    font-size:.75rem;
+    font-weight:500;
+    background:transparent;
+    color:var(--text-muted);
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    padding:.3rem .6rem;
+    max-width:11rem;
+    cursor:pointer;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  #tz:hover, #current:hover{ border-color:var(--border-hover); color:var(--text); }
+  .message{
+    display:flex;
+    gap:.75rem;
+    background:var(--bg-elevated);
+    padding:.9rem 1rem;
+  }
+  .avatar{
+    position:relative;
+    flex:none;
+    width:2.5rem;height:2.5rem;
+    border-radius:50%;
+    background:linear-gradient(135deg,#5865f2,#8791f7);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:.85rem;color:#fff;
+  }
+  .status-dot{
+    position:absolute;
+    right:-2px;bottom:-2px;
+    width:.85rem;height:.85rem;
+    border-radius:50%;
+    background:var(--success);
+    border:3px solid var(--bg-elevated);
+  }
+  .message-body{ min-width:0; }
+  .message-meta{
+    display:flex;
+    align-items:baseline;
+    gap:.5rem;
+    margin-bottom:.15rem;
+  }
+  .message-author{ font-weight:600; font-size:.92rem; }
+  .message-time{ font-size:.72rem; color:var(--text-faint); }
+  .message-text{
+    margin:0;
+    font-size:.92rem;
+    color:var(--text);
+    word-break:break-word;
+  }
+  .ts-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:.3rem;
+    background:var(--brand-soft);
+    color:var(--brand-fg-strong);
+    border-radius:4px;
+    padding:.05rem .35rem;
+    transition:background .15s ease;
+  }
+  .ts-chip svg{ width:.85em; height:.85em; flex:none; }
+  .message:hover .ts-chip{ background:var(--brand-soft-strong); text-decoration:underline; }
 
-        .skip-link {
-            position: absolute;
-            left: 1rem; top: -3rem;
-            background: var(--brand);
-            color: #fff;
-            padding: .6rem 1rem;
-            border-radius: var(--radius-sm);
-            z-index: 100;
-            transition: 150ms;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        .skip-link:focus { top: 1rem; }
+  .output-row{
+    display:flex;
+    gap:.6rem;
+    margin-bottom:.6rem;
+  }
+  #code{
+    flex:1;
+    min-width:0;
+    padding:.65rem .8rem;
+    font-family:var(--font-mono);
+    font-size:.9rem;
+  }
 
-        kbd {
-            font-family: var(--font-mono);
-            font-size: .85em;
-            background: var(--bg-elevated);
-            border: 1px solid var(--border);
-            border-bottom-width: 2px;
-            border-radius: 4px;
-            padding: .05em .35em;
-            color: var(--text);
-            white-space: nowrap;
-        }
+  button{
+    font-family:var(--font-sans);
+    cursor:pointer;
+    border:none;
+    border-radius:var(--radius-md);
+    font-weight:600;
+    font-size:.88rem;
+    transition:transform .12s ease, background .15s ease;
+  }
+  button:active{ transform:scale(.96); }
 
-        /* Ambient brand glow — largest paint layer on the page; dropped
-           on narrow viewports where it's mostly off-canvas anyway. */
-        .glow {
-            position: fixed;
-            width: 60rem; height: 60rem;
-            top: -30rem; left: 50%;
-            background: radial-gradient(circle, var(--brand-soft) 0, transparent 65%);
-            pointer-events: none;
-            z-index: 0;
-            animation: drift 16s ease-in-out infinite;
-            will-change: transform;
-            contain: strict;
-        }
-        @media (max-width: 32rem) { .glow { display: none; } }
+  #copy{
+    display:inline-flex;
+    align-items:center;
+    gap:.4rem;
+    white-space:nowrap;
+    background:var(--brand);
+    color:#fff;
+    padding:.65rem 1.1rem;
+  }
+  #copy:hover{ background:var(--brand-hover); }
+  #copy.copied{ background:var(--success); }
+  #copy svg{ width:1em; height:1em; }
+  #copy .check{ display:none; }
+  #copy.copied .clip{ display:none; }
+  #copy.copied .check{ display:inline-block; animation:popIn .3s ease; }
+  .copy-label{ display:inline-block; min-width:5.5rem; text-align:center; }
 
-        main {
-            position: relative;
-            z-index: 1;
-            max-width: 38rem;
-            margin: 0 auto;
-            padding: 3.5rem 1.25rem 4rem;
-        }
+  .hint{
+    font-size:.78rem;
+    color:var(--text-faint);
+    margin:0 0 1.25rem;
+  }
 
-        header.hero {
-            text-align: center;
-            margin-block-end: 2.25rem;
-            animation: fadeUp .5s ease both;
-        }
+  .actions{
+    display:flex;
+    justify-content:flex-end;
+  }
+  #current{
+    background:transparent;
+    color:var(--text-muted);
+    border:1px solid var(--border);
+    padding:.55rem .9rem;
+  }
 
-        /* Hero live-epoch chip. */
-        .eyebrow {
-            display: inline-flex;
-            align-items: center;
-            gap: .5rem;
-            font-size: .72rem;
-            font-weight: 600;
-            letter-spacing: .04em;
-            color: var(--brand);
-            background: var(--brand-soft);
-            padding: .3rem .35rem .3rem .7rem;
-            border-radius: 99px;
-            margin-block-end: 1.1rem;
-        }
-        .eyebrow-dot {
-            position: relative;
-            width: .4rem; height: .4rem;
-            border-radius: 50%;
-            background: var(--brand);
-        }
-        /* Compositor-safe pulse: an outer ring scales up and fades,
-           no repaint like the previous box-shadow animation. */
-        .eyebrow-dot::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            background: var(--brand-soft-strong);
-            transform-origin: center;
-            animation: livePulse 2.2s ease-out infinite;
-            will-change: transform, opacity;
-        }
-        .eyebrow-label { text-transform: uppercase; }
-        .eyebrow-value {
-            font-family: var(--font-mono);
-            font-weight: 500;
-            letter-spacing: 0;
-            color: var(--brand-fg-strong);
-            background: color-mix(in srgb, var(--brand) 12%, transparent);
-            padding: .1rem .5rem;
-            border-radius: 99px;
-            font-variant-numeric: tabular-nums;
-        }
-        @keyframes livePulse {
-            0%   { transform: scale(1);   opacity: 1; }
-            70%  { transform: scale(3.5); opacity: 0; }
-            100% { transform: scale(3.5); opacity: 0; }
-        }
+  .faq{
+    margin-top:1.5rem;
+    overflow:hidden;
+  }
+  .faq summary{
+    cursor:pointer;
+    list-style:none;
+    padding:1rem 1.25rem;
+    font-weight:600;
+    font-size:.92rem;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+  }
+  .faq summary::-webkit-details-marker{ display:none; }
+  .faq-icon{
+    flex:none;
+    font-size:1.1rem;
+    color:var(--text-muted);
+    transition:transform .2s ease;
+    line-height:1;
+  }
+  .faq[open] .faq-icon{ transform:rotate(45deg); }
+  .faq-content{
+    padding:0 1.25rem 1.25rem;
+    color:var(--text-muted);
+    font-size:.9rem;
+  }
+  .faq-content p + p{ margin-top:.75rem; }
 
-        h1 {
-            font-size: 1.9rem;
-            margin: 0 0 .6rem;
-            letter-spacing: -.01em;
-            font-weight: 700;
-            text-wrap: balance;
-        }
-        .lede {
-            color: var(--text-muted);
-            margin: 0 auto;
-            max-width: 30rem;
-            font-size: .98rem;
-            text-wrap: balance;
-        }
+  footer{
+    max-width:38rem;
+    margin:2rem auto 0;
+    padding:0 1.25rem;
+    text-align:center;
+    font-size:.78rem;
+    color:var(--text-faint);
+  }
+  footer a{ color:var(--text-muted); }
+  footer a:hover{ color:var(--text); }
 
-        /* Shared surface primitive: card, FAQ panel, mock message, toast. */
-        .card, .faq, .message, #toast {
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-md);
-            background: var(--bg-card);
-        }
+  @keyframes fadeUp{
+    from{ transform:translateY(10px); }
+    to{ transform:translateY(0); }
+  }
+  @keyframes pulseDot{
+    0%,100%{ opacity:1; } 50%{ opacity:.35; }
+  }
+  @keyframes popIn{
+    0%{ transform:scale(.5); opacity:0; } 60%{ transform:scale(1.15); } 100%{ transform:scale(1); opacity:1; }
+  }
 
-        .card {
-            border-radius: var(--radius-lg);
-            padding: 1.75rem;
-            box-shadow: var(--shadow-card);
-            animation: fadeUp .5s .08s ease both;
-            contain: layout paint style;
-            container: card / inline-size;
-        }
+  @media (max-width:32rem){
+    .field-row{ grid-template-columns:1fr; }
+    h1{ font-size:1.55rem; }
+    .card{ padding:1.25rem; }
+    .output-row{ flex-direction:column; }
+    #copy{ justify-content:center; }
+  }
 
-        /* Date + Time row + right-anchored reset button. */
-        .field-row-wrap {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: .5rem;
-            margin-block-end: 1.25rem;
-            align-items: end;
-        }
-        .field-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: .9rem;
-        }
-
-        /* Icon-only reset button anchored beside the fields. */
-        .field-reset {
-            background: transparent;
-            color: var(--text-muted);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 0;
-            width: 2.4rem;
-            height: 2.4rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: 150ms;
-        }
-        .field-reset:hover {
-            border-color: var(--border-hover);
-            color: var(--text);
-        }
-        .field-reset:active { transform: rotate(-90deg); }
-        .field-reset svg { width: 1rem; height: 1rem; transition: transform .35s cubic-bezier(.34, 1.56, .64, 1); }
-        .field-reset:hover svg { transform: rotate(-45deg); }
-
-        /* Shared label typography for form-adjacent headings. */
-        .field label,
-        .preview-heading {
-            display: block;
-            font-size: .78rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin: 0 0 .55rem;
-        }
-        .field label { margin-block-end: .4rem; }
-
-        /* Shared bordered form-control base. */
-        .field input, #code {
-            width: 100%;
-            min-width: 0;
-            background: var(--bg-input);
-            color: var(--text);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: .65rem .7rem;
-            font-size: .92rem;
-            transition: 150ms;
-        }
-        #code {
-            flex: 1;
-            font-family: var(--font-mono);
-            padding: .65rem .8rem;
-            font-size: .9rem;
-        }
-        .field input:hover { border-color: var(--border-hover); }
-        .field input:focus, #code:focus, #tz:focus {
-            border-color: var(--brand);
-            box-shadow: 0 0 0 3px var(--brand-soft);
-            outline: 0;
-        }
-
-        /* WebKit-only date/time internals so the field body matches the
-           rest of the UI. The popup itself remains browser chrome. */
-        .field input::-webkit-datetime-edit,
-        .field input::-webkit-datetime-edit-fields-wrapper { padding: 0; }
-        .field input::-webkit-datetime-edit               { color: var(--text); }
-        .field input::-webkit-datetime-edit-text          { color: var(--text-faint); padding: 0 .15rem; }
-        .field input::-webkit-datetime-edit-year-field,
-        .field input::-webkit-datetime-edit-month-field,
-        .field input::-webkit-datetime-edit-day-field,
-        .field input::-webkit-datetime-edit-hour-field,
-        .field input::-webkit-datetime-edit-minute-field,
-        .field input::-webkit-datetime-edit-ampm-field {
-            padding: .05rem .15rem;
-            border-radius: 3px;
-        }
-        .field input::-webkit-datetime-edit-year-field:focus,
-        .field input::-webkit-datetime-edit-month-field:focus,
-        .field input::-webkit-datetime-edit-day-field:focus,
-        .field input::-webkit-datetime-edit-hour-field:focus,
-        .field input::-webkit-datetime-edit-minute-field:focus,
-        .field input::-webkit-datetime-edit-ampm-field:focus {
-            background: var(--brand-soft-strong);
-            color: var(--text);
-            outline: none;
-        }
-
-        /* Native indicator: invisible, full-input click hit-area. Visible
-           icon is the <svg.field-icon> painted on top, animatable per-path. */
-        .field-input { position: relative; }
-        .field-input input { padding-inline-end: 2.1rem; }
-        .field input::-webkit-calendar-picker-indicator {
-            opacity: 0;
-            position: absolute;
-            inset: 0;
-            width: 100%; height: 100%;
-            padding: 0;
-            cursor: pointer;
-        }
-        .field-icon {
-            position: absolute;
-            right: .6rem;
-            top: 50%;
-            width: 1.15rem; height: 1.15rem;
-            color: var(--text-muted);
-            pointer-events: none;
-            /* Uses `translate` (not `transform`) so hover/active `transform`
-               animations don't need to preserve the centring value. */
-            translate: 0 -50%;
-        }
-
-        /* Clock: hands sweep on hover, quicker on click. */
-        .icon-clock .clock-hand { transform-origin: 12px 12px; }
-        .field-input:hover .icon-clock .clock-minute { animation: sweep 3s linear infinite; }
-        .field-input:hover .icon-clock .clock-hour   { animation: sweep 36s linear infinite; }
-        .field-input:active .icon-clock .clock-minute { animation-duration: .5s; }
-        .field-input:active .icon-clock .clock-hour   { animation-duration: 6s; }
-
-        /* Calendar: tabs bob on hover, page-flips on click. */
-        .icon-calendar .cal-tab   { transition: transform .25s cubic-bezier(.34, 1.56, .64, 1); }
-        .icon-calendar .cal-tab-l { transform-origin: 8px 5px;  }
-        .icon-calendar .cal-tab-r { transform-origin: 16px 5px; }
-        .icon-calendar            { transition: transform .35s cubic-bezier(.34, 1.56, .64, 1); }
-        .field-input:hover .icon-calendar { transform: scale(1.08); }
-        .field-input:hover .icon-calendar .cal-tab-l { transform: translateY(-1.5px) rotate(-8deg); }
-        .field-input:hover .icon-calendar .cal-tab-r { transform: translateY(-1.5px) rotate(8deg);  }
-        .field-input:active .icon-calendar { animation: pageFlip .5s ease-in-out; }
-
-        @keyframes sweep    { to { transform: rotate(360deg); } }
-        @keyframes pageFlip { to { transform: rotateY(360deg); } }
-
-        /* Format selector — a full-width, bordered <select> that matches
-           the date/time inputs. Modern browsers get a fully-styled
-           popover with two-line options via `appearance: base-select`. */
-        .format-field { margin-block-end: 1.5rem; position: relative; }
-        .format-select {
-            width: 100%;
-            background: var(--bg-input);
-            color: var(--text);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: .65rem 2.1rem .65rem .7rem;
-            font-size: .92rem;
-            cursor: pointer;
-            appearance: none;
-            transition: 150ms;
-        }
-        .format-select:hover { border-color: var(--border-hover); }
-        .format-select:focus {
-            border-color: var(--brand);
-            box-shadow: 0 0 0 3px var(--brand-soft);
-            outline: 0;
-        }
-        .format-select option { background: var(--bg-elevated); color: var(--text); }
-
-        /* Format-trigger chevron. `bottom` anchors it to the select area
-           (label above throws off `top: 50%`); `translate` compensates
-           for the rotated-border optical bias. */
-        .format-field::after {
-            content: "";
-            position: absolute;
-            right: 1rem;
-            bottom: .95rem;
-            translate: 0 -.15rem;
-            rotate: 45deg;
-            pointer-events: none;
-        }
-        .format-field:hover::after { border-color: var(--text); }
-        .format-field:has(.format-select:focus)::after { border-color: var(--brand); }
-
-        @supports (appearance: base-select) {
-            .format-select, .format-select::picker(select) { appearance: base-select; }
-            .format-select:has(::picker(select):popover-open) { border-color: var(--brand-hover); }
-            .format-select::picker-icon { display: none; }
-            .format-field:has(.format-select::picker(select):popover-open)::after {
-                rotate: -135deg;
-                border-color: var(--brand);
-                bottom: .75rem;
-            }
-
-            .fmt-trigger {
-                display: flex;
-                align-items: center;
-                width: 100%;
-                background: transparent;
-                border: 0;
-                padding: 0;
-                color: inherit;
-                font: inherit;
-                cursor: pointer;
-                text-align: left;
-            }
-
-            .format-select::picker(select) {
-                background: var(--bg-elevated);
-                color: var(--text);
-                border: 1px solid var(--border);
-                border-radius: var(--radius-md);
-                padding: .25rem;
-                box-shadow: 0 20px 40px -20px rgba(0,0,0,.5);
-                max-height: 22rem;
-                overflow-y: auto;
-                width: anchor-size(width);
-                opacity: 0;
-                transform: translateY(-4px);
-                transition: opacity .15s ease, transform .15s ease;
-            }
-            .format-select::picker(select):popover-open { opacity: 1; transform: translateY(0); }
-
-            .format-select option {
-                display: flex;
-                align-items: baseline;
-                gap: .4rem;
-                padding: .5rem .7rem;
-                border-radius: var(--radius-sm);
-                cursor: pointer;
-            }
-            .format-select option:hover   { background: var(--brand-soft); }
-            .format-select option:checked { background: var(--brand-soft-strong); }
-            .format-select option::checkmark { display: none; }
-
-            .fmt-label   { font-size: .92rem; font-weight: 500; color: var(--text); }
-            .fmt-sep     { color: var(--text-faint); }
-            .fmt-example { font-size: .82rem; color: var(--text-faint); font-family: var(--font-mono); }
-            .format-select option:checked .fmt-example { color: var(--brand-fg-strong); }
-        }
-
-        .preview-block { margin-block-end: 1.5rem; }
-        .preview-header {
-            display: flex;
-            align-items: center;
-            gap: .55rem;
-            margin: 0 0 .55rem;
-        }
-        .preview-heading { margin-inline-end: auto; }
-
-        /* Inline timezone selector — aliases .btn-ghost; chevron drawn on
-           the .tz-field wrapper for visual consistency with .format-field. */
-        .tz-field { position: relative; display: inline-flex; }
-        .tz-field::after {
-            content: "";
-            position: absolute;
-            right: .5rem;
-            top: 50%;
-            translate: 0 -70%;
-            rotate: 45deg;
-            pointer-events: none;
-        }
-        .tz-field:hover::after { border-color: var(--text); }
-        .tz-field:has(#tz:focus)::after { border-color: var(--brand); }
-        #tz {
-            font-size: .72rem;
-            font-weight: 500;
-            padding: .1rem 2rem .1rem .5rem;
-            max-width: 12rem;
-            cursor: pointer;
-            appearance: none;
-        }
-        /* Same base-select opt-in for the tz selector — kept separate
-           from the format-select block because merging them into a
-           single @supports rule causes the tz popover to render
-           incorrectly in current Chromium implementations. */
-        @supports (appearance: base-select) {
-            #tz, #tz::picker(select) { appearance: base-select; }
-            #tz:has(::picker(select):popover-open) {
-                border-color: var(--border-hover);
-                color: var(--text);
-            }
-            #tz::picker-icon { display: none; }
-            .tz-field:has(#tz::picker(select):popover-open)::after {
-                rotate: -135deg;
-                border-color: var(--brand);
-                translate: 0 -30%;
-            }
-            #tz::picker(select) {
-                background: var(--bg-elevated);
-                color: var(--text);
-                border: 1px solid var(--border);
-                border-radius: var(--radius-md);
-                padding: .25rem;
-                box-shadow: 0 20px 40px -20px rgba(0,0,0,.5);
-                max-height: 20rem;
-                overflow-y: auto;
-                min-width: 12rem;
-                opacity: 0;
-                transform: translateY(-4px);
-                transition: opacity .15s ease, transform .15s ease;
-            }
-            #tz::picker(select):popover-open { opacity: 1; transform: translateY(0); }
-            #tz option {
-                display: flex;
-                align-items: center;
-                gap: .5rem;
-                padding: .35rem .5rem;
-                border-radius: var(--radius-sm);
-                cursor: pointer;
-                font-size: .82rem;
-            }
-            #tz option:hover   { background: var(--brand-soft); }
-            #tz option:checked { background: var(--brand-soft-strong); color: var(--brand-fg-strong); }
-            #tz option::checkmark { display: none; }
-        }
-
-        .message {
-            display: flex;
-            gap: .75rem;
-            background: var(--bg-elevated);
-            padding: .9rem 1rem;
-        }
-        .avatar {
-            position: relative;
-            flex: none;
-            width: 2.5rem; height: 2.5rem;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #5865f2, #8791f7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: .85rem;
-            color: #fff;
-        }
-        /* Discord-parity presence dot. */
-        .status-dot {
-            position: absolute;
-            right: -3px; bottom: -3px;
-            width: .95rem; height: .95rem;
-            border-radius: 50%;
-            background: var(--success);
-            border: 3px solid var(--bg-elevated);
-        }
-        .message-body { min-width: 0; }
-        .message-meta {
-            display: flex;
-            align-items: baseline;
-            gap: .5rem;
-            margin-block-end: .15rem;
-        }
-        .message-author { font-weight: 600; font-size: .92rem; }
-        .message-time { font-size: .72rem; color: var(--text-faint); }
-        .message-text { margin: 0; font-size: .92rem; word-break: break-word; }
-
-        .ts-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: .3rem;
-            background: var(--brand-soft);
-            color: var(--brand-fg-strong);
-            border-radius: 4px;
-            padding: .05rem .35rem;
-            transition: 150ms;
-        }
-        .ts-chip svg { width: .85em; height: .85em; flex: none; }
-        .message:hover .ts-chip {
-            background: var(--brand-soft-strong);
-            text-decoration: underline;
-        }
-
-        .output-row {
-            display: flex;
-            gap: .6rem;
-            margin-block-end: .6rem;
-        }
-
-        button {
-            cursor: pointer;
-            border: none;
-            border-radius: var(--radius-md);
-            font-weight: 600;
-            font-size: .88rem;
-            transition: 150ms;
-        }
-        button:active { transform: scale(.96); }
-
-        #copy {
-            display: inline-flex;
-            align-items: center;
-            gap: .4rem;
-            white-space: nowrap;
-            background: var(--brand);
-            color: #fff;
-            padding: .65rem 1.1rem;
-            position: relative;
-            overflow: hidden;
-            isolation: isolate;
-        }
-        #copy:hover { background: var(--brand-hover); }
-        #copy.copied { background: var(--success); }
-
-        /* Success ripple on `.copied`. */
-        #copy::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            border-radius: inherit;
-            background: radial-gradient(circle, rgba(255,255,255,.35), transparent 60%);
-            opacity: 0;
-            transform: scale(.2);
-            pointer-events: none;
-            z-index: -1;
-        }
-        #copy.copied::after { animation: ripple .55s ease-out; }
-
-        /* Copy-button icon: clipboard crossfades to a stroke-drawn check
-           on `.copied`. */
-        .copy-icon {
-            width: 1em; height: 1em;
-            position: relative;
-            display: inline-block;
-            flex: none;
-        }
-        .copy-icon svg {
-            position: absolute;
-            inset: 0;
-            width: 100%; height: 100%;
-            transition: opacity .2s ease, transform .3s ease;
-        }
-        .copy-icon .icon-check {
-            opacity: 0;
-            transform: scale(.6);
-            stroke-dasharray: 16;
-            stroke-dashoffset: 16;
-        }
-        #copy.copied .icon-clip {
-            opacity: 0;
-            transform: scale(.6) rotate(-20deg);
-        }
-        #copy.copied .icon-check {
-            opacity: 1;
-            transform: scale(1);
-            animation: drawCheck .4s .05s ease-out forwards;
-        }
-
-        /* Reserved width prevents "Copy code" ↔ "Copied!" reflow. */
-        .copy-label {
-            display: inline-block;
-            min-width: 5.5rem;
-            text-align: center;
-        }
-
-        .hint {
-            font-size: .78rem;
-            color: var(--text-faint);
-            margin: 0 0 1.25rem;
-        }
-
-        .actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: .5rem;
-            flex-wrap: wrap;
-        }
-
-        /* Ghost-button pattern; #tz aliases the colour/border half but keeps
-           its own compact padding (defined above). */
-        .btn-ghost, #tz {
-            background: transparent;
-            color: var(--text-muted);
-            border: 1px solid transparent;
-            border-radius: var(--radius-sm);
-        }
-        .btn-ghost {
-            border-color: var(--border);
-            padding: .55rem .9rem;
-        }
-        .btn-ghost:hover, #tz:hover {
-            border-color: var(--border-hover);
-            color: var(--text);
-        }
-
-        #toast {
-            position: fixed;
-            left: 50%;
-            bottom: 1.5rem;
-            transform: translateX(-50%) translateY(1rem) scale(.95);
-            background: var(--bg-elevated);
-            padding: .55rem .9rem;
-            font-size: .82rem;
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,.6);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity .2s ease, transform .2s cubic-bezier(.34, 1.56, .64, 1);
-            z-index: 200;
-        }
-        #toast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0) scale(1);
-        }
-
-        .faq {
-            margin-block-start: 1.5rem;
-            overflow: hidden;
-        }
-        .faq summary {
-            cursor: pointer;
-            list-style: none;
-            padding: 1rem 1.25rem;
-            font-weight: 600;
-            font-size: .92rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            transition: background-color .15s ease;
-        }
-        .faq summary:hover { background: color-mix(in srgb, var(--brand) 4%, transparent); }
-        .faq summary::-webkit-details-marker { display: none; }
-
-        /* Shared chevron primitive: ▾ closed, ▴ open. FAQ still animates
-           its transform (the FAQ open/close is deliberately animated);
-           the format + tz chevrons flip instantly. */
-        .faq-icon, .format-field::after, .tz-field::after {
-            width: .5rem; height: .5rem;
-            border-right: 2px solid var(--text-muted);
-            border-bottom: 2px solid var(--text-muted);
-            transition: border-color .15s ease;
-        }
-        .faq-icon {
-            flex: none;
-            transform: rotate(45deg) translateY(-2px);
-            transition: transform .25s cubic-bezier(.34, 1.56, .64, 1),
-                        border-color .15s ease;
-        }
-        .faq[open] .faq-icon { transform: rotate(-135deg) translateY(-2px); }
-
-        /* Animated <details> — height 0 ↔ auto animates thanks to
-           `interpolate-size: allow-keywords` on :root. */
-        .faq-content {
-            padding: 0 1.25rem;
-            color: var(--text-muted);
-            font-size: .9rem;
-            content-visibility: auto;
-            contain-intrinsic-size: 0 12rem;
-            height: 0;
-            overflow: hidden;
-            transition: height .3s ease, padding-block .3s ease;
-        }
-        .faq[open] .faq-content {
-            height: auto;
-            padding-block-end: 1.25rem;
-        }
-        .faq-content p { text-wrap: pretty; }
-        .faq-content p + p { margin-block-start: .75rem; }
-
-        footer {
-            max-width: 38rem;
-            margin: 2rem auto 0;
-            padding: 0 1.25rem;
-            text-align: center;
-            font-size: .78rem;
-            color: var(--text-faint);
-            content-visibility: auto;
-            contain-intrinsic-size: 0 3rem;
-        }
-        footer a { color: var(--text-muted); }
-        footer a:hover { color: var(--text); }
-
-        @keyframes fadeUp {
-            from { transform: translateY(10px); opacity: 0; }
-            to   { transform: translateY(0);    opacity: 1; }
-        }
-        @keyframes drift {
-            0%, 100% { transform: translateX(-50%) translateY(0)    scale(1);    }
-            50%      { transform: translateX(-46%) translateY(2rem) scale(1.06); }
-        }
-        @keyframes drawCheck { to { stroke-dashoffset: 0; } }
-        @keyframes ripple {
-            0%   { opacity: 1; transform: scale(.2); }
-            100% { opacity: 0; transform: scale(2.4); }
-        }
-
-        /* Only stack the copy button under the code output on narrow
-           cards; date/time inputs stay side-by-side even on mobile. */
-        @container card (max-width: 26rem) {
-            .output-row { flex-direction: column; }
-            #copy       { justify-content: center; }
-        }
-        @media (max-width: 32rem) {
-            h1    { font-size: 1.55rem; }
-            .card { padding: 1.25rem; }
-        }
-
-        /* Very narrow (small phones) — stack date over time. */
-        @media (max-width: 28.75rem) {
-            .field-row { grid-template-columns: 1fr; }
-        }
-
-        /* Keyboard-shortcut tip is meaningless without a keyboard. */
-        @media (hover: none) and (pointer: coarse) {
-            .hint-kbd { display: none; }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: .01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: .01ms !important;
-                scroll-behavior: auto !important;
-            }
-            .glow, #copy.copied::after { animation: none; }
-            #copy.copied .icon-check { stroke-dashoffset: 0; }
-            .card, header.hero { opacity: 1; }
-        }
-    </style>
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
+    .glow{ animation:none; }
+  }
+</style>
 </head>
 <body>
-    <a href="#main" class="skip-link">Skip to content</a>
-    <div class="glow" aria-hidden="true"></div>
 
-    <main id="main" tabindex="-1">
-        <header class="hero">
-            <div class="eyebrow" aria-label="Current Unix epoch">
-                <span class="eyebrow-dot" aria-hidden="true"></span>
-                <span class="eyebrow-label">NOW</span>
-                <span class="eyebrow-value" id="liveEpoch" aria-live="off">—</span>
-            </div>
-            <h1>Discord Timestamp Generator</h1>
-            <p class="lede">
-                Enter a date and time, pick a display format, then paste the generated code into
-                Discord. Every reader sees it in their own timezone automatically.
-            </p>
-        </header>
+<a href="#main" class="skip-link">Skip to content</a>
+<div class="glow" aria-hidden="true"></div>
 
-        <form class="card" id="generator">
-            <div class="field-row-wrap">
-                <div class="field-row">
-                    <div class="field">
-                        <label for="d">Date</label>
-                        <div class="field-input">
-                            <input type="date" id="d" name="date">
-                            <svg class="field-icon icon-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <rect class="cal-body" x="3" y="5" width="18" height="16" rx="2"/>
-                                <path class="cal-head" d="M3 10h18"/>
-                                <path class="cal-tab cal-tab-l" d="M8 3v4"/>
-                                <path class="cal-tab cal-tab-r" d="M16 3v4"/>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label for="hm">Time</label>
-                        <div class="field-input">
-                            <input type="time" id="hm" name="time">
-                            <svg class="field-icon icon-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <circle cx="12" cy="12" r="9"/>
-                                <path class="clock-hand clock-hour"   d="M12 12V7"    />
-                                <path class="clock-hand clock-minute" d="M12 12l3.5 2"/>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                <button type="button" id="current" class="field-reset" aria-label="Reset date and time to now" title="Reset to now">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M3 12a9 9 0 1 0 3-6.7"/>
-                        <path d="M3 4v5h5"/>
-                    </svg>
-                </button>
-            </div>
+<main id="main">
+  <header class="hero">
+    <span class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span> Discord message formatting</span>
+    <h1>Discord Timestamp Generator</h1>
+    <p class="lede">Pick a date and time, choose how it should read, and copy a code that shows correctly for everyone — in their own timezone.</p>
+  </header>
 
-            <div class="field format-field">
-                <label for="format">Format</label>
-                <select id="format" name="t" class="format-select">
-                    <button type="button" class="fmt-trigger">
-                        <selectedcontent></selectedcontent>
-                    </button>
-                    <option value="t"><span class="fmt-label">Short Time</span><span class="fmt-sep">·</span><span class="fmt-example" data-fmt="t"></span></option>
-                    <option value="T"><span class="fmt-label">Long Time</span><span class="fmt-sep">·</span><span class="fmt-example" data-fmt="T"></span></option>
-                    <option value="d"><span class="fmt-label">Short Date</span><span class="fmt-sep">·</span><span class="fmt-example" data-fmt="d"></span></option>
-                    <option value="D"><span class="fmt-label">Long Date</span><span class="fmt-sep">·</span><span class="fmt-example" data-fmt="D"></span></option>
-                    <option value="f"><span class="fmt-label">Long Date + Time</span><span class="fmt-sep">·</span><span class="fmt-example" data-fmt="f"></span></option>
-                    <option value="F"><span class="fmt-label">Full Date + Time</span><span class="fmt-sep">·</span><span class="fmt-example" data-fmt="F"></span></option>
-                    <option value="R"><span class="fmt-label">Relative</span><span class="fmt-sep">·</span><span class="fmt-example" data-fmt="R"></span></option>
-                </select>
-                <!-- Blocking pre-select — runs before first paint so the
-                     default option never flashes over the stored choice. -->
-                <script>
-                    (function () {
-                        try {
-                            var valid = ["t","T","d","D","f","F","R"];
-                            var pick = null;
-                            var m = location.hash.match(/(?:^|[#&])f=([tTdDfFR])(?:&|$)/);
-                            if (m) pick = m[1];
-                            if (!pick) {
-                                try {
-                                    var stored = localStorage.getItem("dtg:lastFormat");
-                                    if (valid.indexOf(stored) !== -1) pick = stored;
-                                } catch (_) {}
-                            }
-                            var sel = document.getElementById("format");
-                            if (sel) sel.value = pick || "D";
-                        } catch (_) {}
-                    })();
-                </script>
-            </div>
+  <form class="card" id="generator">
+    <div class="field-row">
+      <div class="field">
+        <label for="d">Date</label>
+        <input type="date" id="d" name="date">
+      </div>
+      <div class="field">
+        <label for="hm">Time</label>
+        <input type="time" id="hm" name="time">
+      </div>
+    </div>
 
-            <div class="output-row">
-                <label for="code" class="sr-only">Generated timestamp code</label>
-                <input readonly type="text" id="code" spellcheck="false" autocomplete="off" aria-describedby="codeHint">
-                <button type="button" id="copy" aria-label="Copy code to clipboard">
-                    <span class="copy-icon" aria-hidden="true">
-                        <svg class="icon-clip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="9" y="9" width="11" height="11" rx="2"/>
-                            <path d="M5 15V5a2 2 0 0 1 2-2h10"/>
-                        </svg>
-                        <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M5 13l4 4L19 7"/>
-                        </svg>
-                    </span>
-                    <span class="copy-label" aria-live="polite">Copy code</span>
-                </button>
-            </div>
-            <p class="hint" id="codeHint">
-                Uses your local timezone. The timestamp converts automatically for everyone who reads it.
-                <span class="hint-kbd">Tip: <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>Enter</kbd> copies, <kbd>R</kbd> resets to now.</span>
-            </p>
+    <fieldset>
+      <legend>Format</legend>
+      <div class="pills" id="pills">
+        <input class="pill-input" type="radio" name="t" id="fmt-t" value="t">
+        <label class="pill" for="fmt-t"><span class="pill-label">Short Time</span><span class="pill-example" data-fmt="t"></span></label>
 
-            <div class="preview-block">
-                <div class="preview-header">
-                    <h2 class="preview-heading">Preview</h2>
-                    <label for="tz" class="sr-only">Preview as timezone</label>
-                    <span class="tz-field">
-                        <select id="tz" aria-label="Preview as timezone">
-                            <option value="local">My local time</option>
-                        </select>
-                    </span>
-                </div>
-                <div class="message">
-                    <div class="avatar" aria-hidden="true">
-                        TS
-                        <span class="status-dot"></span>
-                    </div>
-                    <div class="message-body">
-                        <div class="message-meta">
-                            <span class="message-author">You</span>
-                            <span class="message-time" id="sentAt"></span>
-                        </div>
-                        <p class="message-text" aria-atomic="true" aria-live="polite" aria-busy="false">
-                            Reminder set for
-                            <span class="ts-chip">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                    <circle cx="12" cy="12" r="9"/>
-                                    <path d="M12 7v5l3.5 2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                <span id="previewText">—</span>
-                            </span>.
-                        </p>
-                    </div>
-                </div>
-            </div>
+        <input class="pill-input" type="radio" name="t" id="fmt-T" value="T">
+        <label class="pill" for="fmt-T"><span class="pill-label">Long Time</span><span class="pill-example" data-fmt="T"></span></label>
 
-            <div class="actions">
-                <button type="button" id="paste" class="btn-ghost" aria-label="Paste a Discord timestamp code from the clipboard and decode it back into the form">Paste code</button>
-                <button type="button" id="share" class="btn-ghost" aria-label="Copy a shareable link to this timestamp">Copy share link</button>
-            </div>
-        </form>
+        <input class="pill-input" type="radio" name="t" id="fmt-d" value="d">
+        <label class="pill" for="fmt-d"><span class="pill-label">Short Date</span><span class="pill-example" data-fmt="d"></span></label>
 
-        <details class="faq">
-            <summary>
-                What are Discord timestamps, and why use them?
-                <span class="faq-icon" aria-hidden="true"></span>
-            </summary>
-            <div class="faq-content">
-                <p>
-                    A Discord timestamp is not simple plain text, it's a timezone conversion. When you send
-                    <code>&lt;t:1786954860:D&gt;</code> in a message, Discord doesn't store the words
-                    "August 17, 2026." It stores a single point in time, then renders it in each reader's
-                    own timezone and language automatically. Someone in London and someone in Los Angeles
-                    see different clock times, but they're both looking at the same moment.
-                </p>
-                <p>
-                    It's most impactful for anything time-sensitive in a server with people spread across
-                    timezones; e.g. event start times, deadlines, "see you at" messages. Typing "9pm" leaves
-                    everyone guessing whose 9pm you mean. A timestamp code removes the guesswork entirely.
-                </p>
-                <p>
-                    The seven format options above control how it reads, not what time it represents:
-                    <strong>R</strong> gives a self-updating "in 3 hours" or "2 days ago,"
-                    <strong>F</strong> spells out the full date and day of the week, and so on.
-                    Pick whichever fits the message, then paste the generated code straight into your
-                    Discord message.
-                </p>
-            </div>
-        </details>
+        <input class="pill-input" type="radio" name="t" id="fmt-D" value="D" checked>
+        <label class="pill" for="fmt-D"><span class="pill-label">Long Date</span><span class="pill-example" data-fmt="D"></span></label>
 
-        <footer>
-            Built for Discord's
-            <a href="https://discord.com/developers/docs/reference#message-formatting-timestamp-styles"
-               target="_blank" rel="noopener noreferrer">native timestamp tags</a>.
-        </footer>
-    </main>
+        <input class="pill-input" type="radio" name="t" id="fmt-f" value="f">
+        <label class="pill" for="fmt-f"><span class="pill-label">Long Date + Time</span><span class="pill-example" data-fmt="f"></span></label>
 
-    <div id="toast" role="status" aria-live="polite"></div>
+        <input class="pill-input" type="radio" name="t" id="fmt-F" value="F">
+        <label class="pill" for="fmt-F"><span class="pill-label">Full Date + Time</span><span class="pill-example" data-fmt="F"></span></label>
 
-    <script type="module">
-        const LANG = navigator.language || "en";
-        const VALID = ["t","T","d","D","f","F","R"];
-        const DEFAULT_FORMAT = "D";
-        const STORAGE_KEY = "dtg:lastFormat";
-        const CODE_RE = /<t:(\d+)(?::([tTdDfFR]))?>/;
+        <input class="pill-input" type="radio" name="t" id="fmt-R" value="R">
+        <label class="pill" for="fmt-R"><span class="pill-label">Relative</span><span class="pill-example" data-fmt="R"></span></label>
+      </div>
+    </fieldset>
 
-        // Ordered largest-first — matches Discord's R-format thresholds.
-        const RELATIVE_BUCKETS = [
-            [31536000, "years"],
-            [ 2592000, "months"],
-            [   86400, "days"],
-            [    3600, "hours"],
-            [      60, "minutes"],
-            [       1, "seconds"],
-        ];
-
-        // Intl.* construction is expensive; each entry is a factory memoised
-        // by `fmt()` per (key, timeZone). `numeric: "always"` matches
-        // Discord's R rendering ("in 1 day", not "tomorrow").
-        const MAKE_FORMATTER = {
-            t: (tz) => new Intl.DateTimeFormat(LANG, { timeStyle: "short",  timeZone: tz }),
-            T: (tz) => new Intl.DateTimeFormat(LANG, { timeStyle: "medium", timeZone: tz }),
-            d: (tz) => new Intl.DateTimeFormat(LANG, { dateStyle: "short",  timeZone: tz }),
-            D: (tz) => new Intl.DateTimeFormat(LANG, { dateStyle: "long",   timeZone: tz }),
-            f: (tz) => new Intl.DateTimeFormat(LANG, { dateStyle: "long",  timeStyle: "short", timeZone: tz }),
-            F: (tz) => new Intl.DateTimeFormat(LANG, { dateStyle: "full",  timeStyle: "short", timeZone: tz }),
-            R: ()   => new Intl.RelativeTimeFormat(LANG, { style: "long", numeric: "always" }),
-        };
-
-        const formatterCache = new Map();
-        function fmt(key, tz) {
-            const k = tz ? `${key}@${tz}` : key;
-            let f = formatterCache.get(k);
-            if (!f) formatterCache.set(k, f = MAKE_FORMATTER[key](tz));
-            return f;
-        }
-
-        function formatAs(key, date, tz) {
-            if (key === "R") {
-                const rtf = fmt("R");
-                const delta = Math.round((date.getTime() - Date.now()) / 1000);
-                const abs = Math.abs(delta);
-                for (const [seconds, unit] of RELATIVE_BUCKETS) {
-                    if (abs >= seconds) return rtf.format(Math.round(delta / seconds), unit);
-                }
-                return rtf.format(0, "seconds");
-            }
-            return fmt(key, tz).format(date);
-        }
-
-        const $ = (id) => document.getElementById(id);
-        const generator   = $("generator");
-        const dateInput   = $("d");
-        const timeInput   = $("hm");
-        const codeOutput  = $("code");
-        const copyBtn     = $("copy");
-        const copyLabel   = copyBtn.querySelector(".copy-label");
-        const currentBtn  = $("current");
-        const shareBtn    = $("share");
-        const pasteBtn    = $("paste");
-        const previewText = $("previewText");
-        const messageText = document.querySelector(".message-text");
-        const sentAt      = $("sentAt");
-        const tzSelect    = $("tz");
-        const toast       = $("toast");
-        const liveEpoch   = $("liveEpoch");
-        const formatExamples = document.querySelectorAll(".fmt-example");
-        // <selectedcontent> only exists in browsers with base-select support.
-        const selectedContent = document.querySelector("selectedcontent");
-
-        // <select> lives on generator.elements.t (name="t"); .value gets
-        // and sets the chosen option directly.
-        const formatSelect = generator.elements.t;
-        let currentFormat = formatSelect.value || DEFAULT_FORMAT;
-
-        // Built as a local Date directly (DST-safe, unlike
-        // `valueAsNumber + getTimezoneOffset()`).
-        function readLocalDate() {
-            const dv = dateInput.value, tv = timeInput.value;
-            if (!dv || !tv) return null;
-            const [Y, M, D] = dv.split("-").map(Number);
-            const [h, m]    = tv.split(":").map(Number);
-            if ([Y, M, D, h, m].some(Number.isNaN)) return null;
-            return new Date(Y, M - 1, D, h, m);
-        }
-
-        function setInputsFromDate(d, format) {
-            const p = (n) => String(n).padStart(2, "0");
-            dateInput.value = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-            timeInput.value = `${p(d.getHours())}:${p(d.getMinutes())}`;
-            if (format) {
-                formatSelect.value = format;
-                currentFormat = format;
-            }
-        }
-
-        function setCopyState(label, copied = false) {
-            copyBtn.classList.toggle("copied", copied);
-            copyLabel.textContent = label;
-        }
-
-        let toastTimer;
-        function showToast(msg) {
-            toast.textContent = msg;
-            toast.classList.add("show");
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
-        }
-
-        function parseHash() {
-            const raw = location.hash.replace(/^#/, "");
-            if (!raw) return null;
-            const p = new URLSearchParams(raw);
-            const t = Number(p.get("t"));
-            const f = p.get("f");
-            if (!Number.isFinite(t) || t <= 0) return null;
-            return { date: new Date(t * 1000), format: VALID.includes(f) ? f : DEFAULT_FORMAT };
-        }
-        function updateHash(unix, format) {
-            const hash = `#t=${unix}&f=${format}`;
-            if (location.hash !== hash) history.replaceState(null, "", hash);
-        }
-
-        // WAAPI keyframes/options hoisted so flashPreview doesn't reallocate.
-        const FLASH_KEYFRAMES = [{ opacity: .4 }, { opacity: 1 }];
-        const FLASH_OPTIONS   = { duration: 500, easing: "ease" };
-        const flashPreview = typeof previewText.animate === "function"
-            ? () => previewText.animate(FLASH_KEYFRAMES, FLASH_OPTIONS)
-            : () => {};
-
-        // rAF-coalesced renders — burst updates paint once.
-        let renderScheduled = false;
-        let lastRenderedUnix = null;
-        let hasUserInteracted = false;
-
-        function scheduleRender() {
-            if (renderScheduled) return;
-            renderScheduled = true;
-            messageText.setAttribute("aria-busy", "true");
-            requestAnimationFrame(render);
-        }
-
-        function render() {
-            renderScheduled = false;
-
-            const date = readLocalDate();
-            if (!date) {
-                codeOutput.value = "";
-                previewText.textContent = "—";
-                messageText.setAttribute("aria-busy", "false");
-                return;
-            }
-
-            const format = currentFormat;
-            const tz     = tzSelect.value !== "local" ? tzSelect.value : undefined;
-            const unix   = Math.floor(date.getTime() / 1000);
-
-            const codeStr = `<t:${unix}:${format}>`;
-            if (codeOutput.value !== codeStr) codeOutput.value = codeStr;
-
-            if (unix !== lastRenderedUnix) {
-                codeOutput.title = `Unix epoch: ${unix}`;
-                lastRenderedUnix = unix;
-            }
-
-            previewText.textContent = formatAs(format, date, tz);
-            flashPreview();
-            for (const el of formatExamples) el.textContent = formatAs(el.dataset.fmt, date);
-
-            // <selectedcontent> clones the option's DOM but doesn't
-            // re-clone when we mutate child text; mirror manually.
-            if (selectedContent) {
-                const opt = formatSelect.selectedOptions[0];
-                if (opt) selectedContent.replaceChildren(...Array.from(opt.childNodes, n => n.cloneNode(true)));
-            }
-
-            setCopyState("Copy code");
-            try { localStorage.setItem(STORAGE_KEY, format); } catch (_) {}
-            if (hasUserInteracted) updateHash(unix, format);
-
-            messageText.setAttribute("aria-busy", "false");
-        }
-
-        function resetToNow() {
-            setInputsFromDate(new Date());
-            scheduleRender();
-        }
-
-        let copyResetTimer;
-        async function copyCode() {
-            render();
-            if (!codeOutput.value) return;
-            let ok = true;
-            try { await navigator.clipboard.writeText(codeOutput.value); }
-            catch (_) { ok = false; codeOutput.focus(); codeOutput.select(); }
-            setCopyState(ok ? "Copied!" : "Press Ctrl/Cmd+C", ok);
-            clearTimeout(copyResetTimer);
-            copyResetTimer = setTimeout(() => setCopyState("Copy code"), 2000);
-        }
-
-        // Desktop Chromium can crash the renderer on synthetic-URL share
-        // payloads (RESULT_CODE_KILLED_BAD_MESSAGE), so restrict the
-        // native share sheet to real touch devices.
-        const isTouchDevice = matchMedia("(hover: none) and (pointer: coarse)").matches;
-
-        async function copyShareLink() {
-            const date = readLocalDate();
-            if (date) updateHash(Math.floor(date.getTime() / 1000), currentFormat);
-            const url = location.origin + location.pathname + location.hash;
-
-            if (isTouchDevice && navigator.share) {
-                const payload = { title: document.title, url };
-                if (!navigator.canShare || navigator.canShare(payload)) {
-                    try { await navigator.share(payload); return; }
-                    catch (err) { if (err?.name === "AbortError") return; }
-                }
-            }
-            try {
-                await navigator.clipboard.writeText(url);
-                showToast("Share link copied");
-            } catch (_) {
-                showToast("Copy failed — select the address bar");
-            }
-        }
-
-        async function pasteAndDecode() {
-            if (!navigator.clipboard?.readText) return showToast("Clipboard read not supported");
-            let text;
-            try { text = await navigator.clipboard.readText(); }
-            catch (_) { return showToast("Clipboard permission denied"); }
-            const m = CODE_RE.exec(text);
-            if (!m) return showToast("No <t:...> code found on clipboard");
-            const unix = Number(m[1]);
-            if (!Number.isFinite(unix) || unix <= 0) return showToast("Invalid timestamp");
-            hasUserInteracted = true;
-            setInputsFromDate(new Date(unix * 1000), m[2] || DEFAULT_FORMAT);
-            scheduleRender();
-            showToast("Decoded");
-        }
-
-        function populateTimeZones() {
-            const curated = ["UTC","America/Los_Angeles","America/New_York","Europe/London","Europe/Berlin","Asia/Kolkata","Asia/Tokyo","Australia/Sydney"];
-            let zones;
-            try { zones = Intl.supportedValuesOf?.("timeZone") || curated; }
-            catch (_) { zones = curated; }
-            if (zones.length > 40) zones = curated;
-            const frag = document.createDocumentFragment();
-            for (const z of zones) {
-                const o = document.createElement("option");
-                o.value = z;
-                o.textContent = z.replace(/_/g, " ");
-                frag.appendChild(o);
-            }
-            tzSelect.appendChild(frag);
-        }
-
-        const startTransition = document.startViewTransition?.bind(document) ?? ((fn) => fn());
-
-        // Any form change is a user interaction; format changes crossfade
-        // via View Transitions.
-        generator.addEventListener("change", (e) => {
-            hasUserInteracted = true;
-            if (e.target === formatSelect) {
-                currentFormat = e.target.value;
-                startTransition(render);
-            } else {
-                scheduleRender();
-            }
-        });
-
-        codeOutput.addEventListener("focus", function () { this.select(); });
-        currentBtn.addEventListener("click", () => { hasUserInteracted = true; resetToNow(); });
-        copyBtn.addEventListener("click",   () => { hasUserInteracted = true; copyCode(); });
-        shareBtn.addEventListener("click",  copyShareLink);
-        pasteBtn.addEventListener("click",  pasteAndDecode);
-
-        document.addEventListener("keydown", (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-                e.preventDefault();
-                hasUserInteracted = true;
-                copyCode();
-                return;
-            }
-            if ((e.key === "r" || e.key === "R") && !e.ctrlKey && !e.metaKey) {
-                const tag = e.target?.tagName;
-                if (tag !== "INPUT" && tag !== "TEXTAREA") {
-                    e.preventDefault();
-                    hasUserInteracted = true;
-                    resetToNow();
-                }
-            }
-        });
-
-        // Boot ----------------------------------------------------------
-        populateTimeZones();
-
-        // "Sent at" is frozen at load — a live clock made the mock
-        // message look like it was constantly resending itself.
-        sentAt.textContent = fmt("t").format(new Date());
-
-        // Live epoch ticker; paused when the tab is hidden. Mutates a
-        // cached Text node — cheaper than reassigning .textContent.
-        let epochTimer;
-        const epochNode = liveEpoch.firstChild;
-        const tickEpoch   = () => { epochNode.data = Math.floor(Date.now() / 1000); };
-        const startTicker = () => { tickEpoch(); epochTimer = setInterval(tickEpoch, 1000); };
-        const stopTicker  = () => clearInterval(epochTimer);
-        startTicker();
-        document.addEventListener("visibilitychange", () => {
-            document.hidden ? stopTicker() : startTicker();
-        });
-
-        const fromHash = parseHash();
-        if (fromHash) {
-            setInputsFromDate(fromHash.date, fromHash.format);
-            hasUserInteracted = true;
-            render();
-        } else {
-            // Sync `currentFormat` with whatever the inline pre-select
-            // script chose before first paint.
-            currentFormat = formatSelect.value || DEFAULT_FORMAT;
-            resetToNow();
-        }
-
-        // Warm the remaining formatters during idle so the first pill
-        // change doesn't pay the Intl construction cost.
-        (window.requestIdleCallback ?? ((cb) => setTimeout(cb, 200)))(() => {
-            for (const key of VALID) fmt(key);
-        });
-    </script>
-
-    <noscript>
-        <div style="max-width:38rem;margin:1rem auto;padding:1rem;background:#2b2d31;border:1px solid #3b3d43;border-radius:10px;text-align:center;color:#f2f3f5">
-            Enable JavaScript to generate timestamp codes.
+    <div class="preview-block">
+      <div class="preview-header">
+        <span id="previewLabel">Preview</span>
+        <label for="tz" class="sr-only">Preview in timezone</label>
+        <select id="tz">
+          <option value="local">My local time</option>
+          <option value="UTC">UTC</option>
+          <option value="America/Los_Angeles">Los Angeles</option>
+          <option value="America/New_York">New York</option>
+          <option value="Europe/London">London</option>
+          <option value="Europe/Berlin">Berlin</option>
+          <option value="Asia/Tokyo">Tokyo</option>
+          <option value="Asia/Kolkata">Mumbai</option>
+          <option value="Australia/Sydney">Sydney</option>
+        </select>
+      </div>
+      <div class="message">
+        <div class="avatar" aria-hidden="true">TS<span class="status-dot"></span></div>
+        <div class="message-body">
+          <div class="message-meta">
+            <span class="message-author">You</span>
+            <span class="message-time" id="sentAt"></span>
+          </div>
+          <p class="message-text" aria-labelledby="previewLabel">
+            Reminder set for
+            <span class="ts-chip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span id="previewText" aria-live="polite">—</span>
+            </span>.
+          </p>
         </div>
-    </noscript>
+      </div>
+    </div>
+
+    <div class="output-row">
+      <label for="code" class="sr-only">Generated timestamp code</label>
+      <input type="text" readonly id="code" title="Click to select, then copy" value="">
+      <button type="button" id="copy" aria-label="Copy code to clipboard">
+        <svg class="clip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="copy-label">Copy code</span>
+      </button>
+    </div>
+    <p class="hint">Uses your local timezone — the timestamp converts automatically for everyone who reads it.</p>
+
+    <div class="actions">
+      <button type="button" id="current">Reset to current time</button>
+    </div>
+  </form>
+
+  <details class="faq">
+    <summary>What are Discord timestamps, and why use them?<span class="faq-icon" aria-hidden="true">+</span></summary>
+    <div class="faq-content">
+      <p>A Discord timestamp isn't text — it's a live conversion. When you send <code>&lt;t:1786954860:D&gt;</code> in a message, Discord doesn't store the words "August 17, 2026." It stores a single point in time, then renders it in each reader's own timezone and language automatically. Someone in Auckland and someone in Los Angeles see different clock times, but they're both looking at the same moment.</p>
+      <p>That matters most for anything time-sensitive in a server with people spread across timezones — event start times, deadlines, "see you at" messages. Typing "9pm" leaves everyone guessing whose 9pm you mean. A timestamp code removes the guesswork entirely.</p>
+      <p>The seven format options above control how it reads, not what time it represents: <strong>R</strong> gives a self-updating "in 3 hours" or "2 days ago," <strong>F</strong> spells out the full date and day of the week, and so on. Pick whichever fits the message, then paste the generated code straight into Discord.</p>
+    </div>
+  </details>
+
+  <footer>
+    Built for Discord's <a href="https://discord.com/developers/docs/reference#message-formatting-timestamp-styles" target="_blank" rel="noopener noreferrer">native timestamp tags</a>.
+  </footer>
+</main>
+
+<script>
+(function(){
+  "use strict";
+
+  const dateInput = document.getElementById('d');
+  const timeInput = document.getElementById('hm');
+  const pillInputs = Array.from(document.querySelectorAll('.pill-input'));
+  const output = document.getElementById('code');
+  const copyBtn = document.getElementById('copy');
+  const copyLabel = copyBtn.querySelector('.copy-label');
+  const resetBtn = document.getElementById('current');
+  const previewText = document.getElementById('previewText');
+  const sentAt = document.getElementById('sentAt');
+  const exampleEls = Array.from(document.querySelectorAll('.pill-example'));
+  const tzSelect = document.getElementById('tz');
+
+  const typeFormats = {
+    t: { timeStyle: 'short' },
+    T: { timeStyle: 'medium' },
+    d: { dateStyle: 'short' },
+    D: { dateStyle: 'long' },
+    f: { dateStyle: 'long', timeStyle: 'short' },
+    F: { dateStyle: 'full', timeStyle: 'short' },
+    R: { style: 'long', numeric: 'auto' }
+  };
+
+  function getSelectedFormat(){
+    const checked = pillInputs.find(function(i){ return i.checked; });
+    return checked ? checked.value : 'D';
+  }
+
+  function getSelectedDate(){
+    // Built from the local Y/M/D/h/m parts directly (DST-safe) rather than
+    // summing UTC-ms valueAsNumber fields and correcting by a single
+    // offset, which can drift by an hour right around a DST transition.
+    const [y, mo, d] = dateInput.value.split('-').map(Number);
+    const [h, mi] = timeInput.value.split(':').map(Number);
+    return new Date(y, mo - 1, d, h, mi);
+  }
+
+  function relativeDifference(d){
+    const diff = -((Date.now() - d.getTime()) / 1000) | 0;
+    const absDiff = Math.abs(diff);
+    if (absDiff > 86400 * 30 * 10) return { duration: Math.round(diff / (86400 * 365)), unit: 'years' };
+    if (absDiff > 86400 * 25) return { duration: Math.round(diff / (86400 * 30)), unit: 'months' };
+    if (absDiff > 3600 * 21) return { duration: Math.round(diff / 86400), unit: 'days' };
+    if (absDiff > 60 * 44) return { duration: Math.round(diff / 3600), unit: 'hours' };
+    if (absDiff > 30) return { duration: Math.round(diff / 60), unit: 'minutes' };
+    return { duration: diff, unit: 'seconds' };
+  }
+
+  // Intl.* construction isn't free — cache one formatter per (code, tz)
+  // pair instead of building a fresh one on every keystroke/render.
+  const locale = navigator.language || 'en';
+  const formatterCache = new Map();
+  function withTz(opts, tz){ return tz ? Object.assign({}, opts, { timeZone: tz }) : opts; }
+
+  function formatterFor(code, tz){
+    const key = tz ? code + '@' + tz : code;
+    let f = formatterCache.get(key);
+    if (!f){
+      f = code === 'R'
+        ? new Intl.RelativeTimeFormat(locale, typeFormats.R)
+        : new Intl.DateTimeFormat(locale, withTz(typeFormats[code], tz));
+      formatterCache.set(key, f);
+    }
+    return f;
+  }
+
+  function formatFor(code, date, tz){
+    if (code === 'R'){
+      const rel = relativeDifference(date);
+      return formatterFor('R').format(rel.duration, rel.unit);
+    }
+    return formatterFor(code, tz).format(date);
+  }
+
+  // Hoisted so the flash doesn't reallocate keyframes/options on every call.
+  const FLASH_KEYFRAMES = [{ opacity: .4 }, { opacity: 1 }];
+  const FLASH_OPTIONS = { duration: 500, easing: 'ease' };
+  const flashPreview = typeof previewText.animate === 'function'
+    ? function(){ previewText.animate(FLASH_KEYFRAMES, FLASH_OPTIONS); }
+    : function(){};
+
+  let renderScheduled = false;
+  function scheduleUpdate(){
+    if (renderScheduled) return;
+    renderScheduled = true;
+    requestAnimationFrame(updateOutput);
+  }
+
+  function updateOutput(){
+    renderScheduled = false;
+    const selectedDate = getSelectedDate();
+    const code = getSelectedFormat();
+    const ts = Math.floor(selectedDate.getTime() / 1000);
+    const tz = tzSelect.value !== 'local' ? tzSelect.value : undefined;
+
+    output.value = '<t:' + ts + ':' + code + '>';
+
+    previewText.textContent = formatFor(code, selectedDate, tz);
+    flashPreview();
+
+    exampleEls.forEach(function(el){
+      const fmt = el.getAttribute('data-fmt');
+      el.textContent = formatFor(fmt, selectedDate, tz);
+    });
+
+    sentAt.textContent = new Intl.DateTimeFormat(locale, withTz({ hour: 'numeric', minute: '2-digit' }, tz)).format(new Date());
+
+    copyBtn.classList.remove('copied');
+    copyLabel.textContent = 'Copy code';
+  }
+
+  function resetToNow(){
+    const now = new Date();
+    dateInput.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+    timeInput.value = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+    updateOutput();
+  }
+
+  dateInput.addEventListener('change', scheduleUpdate);
+  timeInput.addEventListener('change', scheduleUpdate);
+  pillInputs.forEach(function(i){ i.addEventListener('change', scheduleUpdate); });
+  tzSelect.addEventListener('change', scheduleUpdate);
+  output.addEventListener('focus', function(){ this.select(); });
+  resetBtn.addEventListener('click', resetToNow);
+
+  copyBtn.addEventListener('click', async function(){
+    updateOutput();
+    let succeeded = true;
+    try {
+      await navigator.clipboard.writeText(output.value);
+    } catch (e) {
+      succeeded = false;
+      output.focus();
+      output.select();
+    }
+
+    if (succeeded){
+      copyBtn.classList.add('copied');
+      copyLabel.textContent = 'Copied!';
+    } else {
+      copyLabel.textContent = 'Press Ctrl/Cmd+C';
+    }
+    clearTimeout(copyBtn._t);
+    copyBtn._t = setTimeout(function(){
+      copyBtn.classList.remove('copied');
+      copyLabel.textContent = 'Copy code';
+    }, 2000);
+  });
+
+  resetToNow();
+})();
+</script>
+
+<noscript>
+  <div style="max-width:38rem;margin:1rem auto;padding:1rem;background:#2b2d31;border:1px solid #3b3d43;border-radius:10px;text-align:center;">
+    Enable JavaScript to generate timestamp codes.
+  </div>
+</noscript>
+
 </body>
 </html>
