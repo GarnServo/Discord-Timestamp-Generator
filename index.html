@@ -242,7 +242,6 @@
       header.hero {
         text-align: center;
         margin-bottom: 2.25rem;
-        animation: fadeUp 0.5s ease both;
       }
       .eyebrow {
         display: inline-flex;
@@ -292,7 +291,6 @@
         border-radius: var(--radius-lg);
         padding: 1.75rem;
         box-shadow: 0 20px 50px -25px rgba(0, 0, 0, 0.6);
-        animation: fadeUp 0.5s 0.08s ease both;
         /* `contain: paint` was clipping the ts-chip tooltip when it
            extended above the card. Layout + style still give the browser
            enough info to skip re-layout of the outer tree on paints. */
@@ -412,7 +410,7 @@
       .pill:active {
         transform: scale(0.97);
       }
-      /* Sits at the bottom of the card now � no trailing margin needed */
+      /* Sits at the bottom of the card now — no trailing margin needed */
       .preview-block {
         margin-top: 0.25rem;
       }
@@ -539,7 +537,7 @@
         opacity: 0;
         pointer-events: none;
         /* 250ms enter delay matches Discord's own tooltip hover behaviour
-           � prevents a chatty tooltip flashing as the pointer moves past. */
+           — prevents a chatty tooltip flashing as the pointer moves past. */
         transition:
           opacity 0.12s ease 0s,
           transform 0.12s ease 0s;
@@ -610,7 +608,7 @@
         background: var(--success);
       }
       /* Single SVG with two overlaid paths that cross-fade + scale-morph.
-         Compositor-only properties (opacity + transform) � no repaints. */
+         Compositor-only properties (opacity + transform) — no repaints. */
       .copy-icon {
         position: relative;
         width: 1em;
@@ -725,7 +723,7 @@
         font-size: 0.85em;
         color: var(--text);
       }
-      /* Footer sits directly under content � the flex column on <body>
+      /* Footer sits directly under content — the flex column on <body>
          no longer stretches it to the viewport bottom. */
       footer {
         max-width: 38rem;
@@ -741,16 +739,6 @@
       }
       footer a:hover {
         color: var(--text);
-      }
-      @keyframes fadeUp {
-        from {
-          transform: translateY(10px);
-          opacity: 0;
-        }
-        to {
-          transform: translateY(0);
-          opacity: 1;
-        }
       }
       @keyframes pulseDot {
         0%,
@@ -988,10 +976,9 @@
               <p class="message-text">
                 <span id="phrase">Reminder set for</span>
                 <span class="ts-chip" tabindex="0" aria-describedby="previewTip"
-                  ><span id="previewText" role="status" aria-atomic="true"
-                    >�</span
+                  ><span id="previewText" role="status">…</span
                   ><span id="previewTip" class="ts-chip-tip" role="tooltip"
-                    >�</span
+                    >…</span
                   ></span
                 ><span id="phraseTail">.</span>
               </p>
@@ -1090,7 +1077,7 @@
             ["Get hyped for", "!"],
             ["Deadline:", ""],
           ],
-          // Relative pool: tense-neutral wrappers only � must work with
+          // Relative pool: tense-neutral wrappers only — must work with
           // both "in 32 minutes" (future) and "2 days ago" (past).
           // Verbs like "starts" or "happening" break the past case, so
           // we lean on natural chat phrasings that reference the moment
@@ -1106,7 +1093,7 @@
             ["So, about", "."],
           ];
 
-        // Pick one phrase per pool on load � stays stable across format
+        // Pick one phrase per pool on load — stays stable across format
         // changes so the copy doesn't jitter, but the absolute?relative
         // pair swaps in seamlessly when the user switches to/from R.
         function pickPhrase(pool) {
@@ -1256,11 +1243,11 @@
         }
 
         // Delegated change handler covers date, time, timezone and all
-        // seven radios in a single listener � one less closure per pill.
+        // seven radios in a single listener — one less closure per pill.
         document
           .getElementById("generator")
           .addEventListener("change", function (ev) {
-            // Radios all share name="t" � cheaper than classList lookup.
+            // Radios all share name="t" — cheaper than classList lookup.
             if (ev.target.name === "t") {
               selectedFmt = ev.target.value;
               try {
