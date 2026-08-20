@@ -996,19 +996,20 @@
     <script>
       !(function () {
         "use strict";
-        const dEl = document.getElementById("d"),
-          hmEl = document.getElementById("hm"),
-          codeEl = document.getElementById("code"),
-          copyBtn = document.getElementById("copy"),
+        const $ = (id) => document.getElementById(id),
+          dEl = $("d"),
+          hmEl = $("hm"),
+          codeEl = $("code"),
+          copyBtn = $("copy"),
           copyLabel = copyBtn.querySelector(".copy-label"),
-          resetBtn = document.getElementById("current"),
-          previewEl = document.getElementById("previewText"),
-          previewTipEl = document.getElementById("previewTip"),
-          phraseEl = document.getElementById("phrase"),
-          phraseTailEl = document.getElementById("phraseTail"),
-          sentAtEl = document.getElementById("sentAt"),
+          resetBtn = $("current"),
+          previewEl = $("previewText"),
+          previewTipEl = $("previewTip"),
+          phraseEl = $("phrase"),
+          phraseTailEl = $("phraseTail"),
+          sentAtEl = $("sentAt"),
           examples = document.querySelectorAll(".pill-example"),
-          tzEl = document.getElementById("tz"),
+          tzEl = $("tz"),
           FORMATS = {
             t: { timeStyle: "short" },
             T: { timeStyle: "medium" },
@@ -1096,13 +1097,6 @@
         const fadeFrames = [{ opacity: 0.4 }, { opacity: 1 }],
           fadeOpts = { duration: 500, easing: "ease" };
 
-        let scheduled = false;
-        function schedule() {
-          if (scheduled) return;
-          scheduled = true;
-          requestAnimationFrame(paint);
-        }
-
         function readDate() {
           const dms = dEl.valueAsNumber,
             tms = hmEl.valueAsNumber;
@@ -1119,7 +1113,6 @@
         }
 
         function paint() {
-          scheduled = false;
           const date = readDate();
           if (!date) return;
           const unix = Math.floor(date.getTime() / 1e3),
@@ -1162,20 +1155,18 @@
             iso = new Date(n - n.getTimezoneOffset() * 6e4).toISOString();
           dEl.value = iso.slice(0, 10);
           hmEl.value = iso.slice(11, 19);
-          schedule();
+          paint();
         }
 
-        document
-          .getElementById("generator")
-          .addEventListener("change", function (ev) {
-            if (ev.target.name === "t") {
-              selectedFmt = ev.target.value;
-              try {
-                localStorage.setItem(STORE_KEY, selectedFmt);
-              } catch (_) {}
-            }
-            schedule();
-          });
+        $("generator").addEventListener("change", function (ev) {
+          if (ev.target.name === "t") {
+            selectedFmt = ev.target.value;
+            try {
+              localStorage.setItem(STORE_KEY, selectedFmt);
+            } catch (_) {}
+          }
+          paint();
+        });
 
         codeEl.addEventListener("focus", function () {
           this.select();
@@ -1183,7 +1174,7 @@
         resetBtn.addEventListener("click", resetToNow);
 
         copyBtn.addEventListener("click", async function () {
-          schedule();
+          paint();
           let ok = true;
           try {
             await navigator.clipboard.writeText(codeEl.value);
@@ -1205,7 +1196,7 @@
           }, 2e3);
         });
 
-        const savedRadio = document.getElementById("fmt-" + selectedFmt);
+        const savedRadio = $("fmt-" + selectedFmt);
         if (savedRadio) savedRadio.checked = true;
 
         resetToNow();
