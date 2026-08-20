@@ -1020,7 +1020,7 @@
           },
           SENT_OPTS = { hour: "numeric", minute: "2-digit" },
           locale = navigator.language || "en",
-          fmtCache = new Map(),
+          fmtCache = {},
           reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches,
           PHRASES_ABS = [
             ["Reminder set for", "."],
@@ -1064,16 +1064,13 @@
         }
         function getFmt(key, tz) {
           const cacheKey = tz ? key + "@" + tz : key;
-          let f = fmtCache.get(cacheKey);
+          let f = fmtCache[cacheKey];
           if (f) return f;
-          if (key === "R") {
-            f = new Intl.RelativeTimeFormat(locale, FORMATS.R);
-          } else if (key === "__sent__") {
-            f = new Intl.DateTimeFormat(locale, withTz(SENT_OPTS, tz));
-          } else {
-            f = new Intl.DateTimeFormat(locale, withTz(FORMATS[key], tz));
-          }
-          fmtCache.set(cacheKey, f);
+          f =
+            key === "R"
+              ? new Intl.RelativeTimeFormat(locale, FORMATS.R)
+              : new Intl.DateTimeFormat(locale, withTz(FORMATS[key], tz));
+          fmtCache[cacheKey] = f;
           return f;
         }
 
@@ -1107,21 +1104,18 @@
         }
 
         function readDate() {
-          if (!dEl.value || !hmEl.value) return null;
-          const [y, mo, da] = dEl.value.split("-").map(Number),
-            timeParts = hmEl.value.split(":").map(Number),
-            h = timeParts[0],
-            mi = timeParts[1],
-            se = timeParts[2] || 0;
-          if (
-            !Number.isFinite(y) ||
-            !Number.isFinite(mo) ||
-            !Number.isFinite(da) ||
-            !Number.isFinite(h) ||
-            !Number.isFinite(mi)
-          )
-            return null;
-          return new Date(y, mo - 1, da, h, mi, se);
+          const dms = dEl.valueAsNumber,
+            tms = hmEl.valueAsNumber;
+          if (!Number.isFinite(dms) || !Number.isFinite(tms)) return null;
+          const d = new Date(dms);
+          return new Date(
+            d.getUTCFullYear(),
+            d.getUTCMonth(),
+            d.getUTCDate(),
+            (tms / 3.6e6) | 0,
+            ((tms / 6e4) | 0) % 60,
+            ((tms / 1e3) | 0) % 60,
+          );
         }
 
         function paint() {
