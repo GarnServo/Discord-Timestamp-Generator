@@ -87,7 +87,6 @@
         --text-muted: #96989d;
         --text-faint: #9fa1aa;
         --brand: #5865f2;
-        /* Static fallbacks first for browsers without color-mix() */
         --brand-hover: #4752c4;
         --brand-hover: color-mix(in srgb, var(--brand) 80%, black);
         --brand-soft: rgba(88, 101, 242, 0.16);
@@ -134,8 +133,6 @@
         margin: 0;
         padding: 0;
       }
-      /* Native form controls inherit color-scheme so their chrome (calendar,
-         time-picker, select popup) matches the site theme in every browser. */
       button,
       input,
       select,
@@ -290,9 +287,6 @@
         border-radius: var(--radius-lg);
         padding: 1.75rem;
         box-shadow: 0 20px 50px -25px rgba(0, 0, 0, 0.6);
-        /* `contain: paint` was clipping the ts-chip tooltip when it
-           extended above the card. Layout + style still give the browser
-           enough info to skip re-layout of the outer tree on paints. */
         contain: layout style;
       }
       .field-row {
@@ -409,7 +403,6 @@
       .pill:active {
         transform: scale(0.97);
       }
-      /* Sits at the bottom of the card now — no trailing margin needed */
       .preview-block {
         margin-top: 0.25rem;
       }
@@ -499,9 +492,6 @@
         color: var(--text);
         word-break: break-word;
       }
-      /* Discord-accurate timestamp: brand-tinted background pill, no icon,
-         with a tooltip that appears above on hover / focus showing the full
-         long-format date. */
       .ts-chip {
         position: relative;
         display: inline-block;
@@ -521,8 +511,6 @@
         position: absolute;
         bottom: calc(100% + 6px);
         left: 50%;
-        /* translate(-50%, ...) lets us drive both horizontal centering and
-           the enter animation from a single transform property. */
         transform: translate(-50%, 4px);
         white-space: nowrap;
         background: #111214;
@@ -535,8 +523,6 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
         opacity: 0;
         pointer-events: none;
-        /* 250ms enter delay matches Discord's own tooltip hover behaviour
-           — prevents a chatty tooltip flashing as the pointer moves past. */
         transition:
           opacity 0.12s ease 0s,
           transform 0.12s ease 0s;
@@ -637,8 +623,6 @@
       }
       .copy-label {
         display: inline-block;
-        /* Reserve width for the widest label ("Press Ctrl/Cmd+C") to
-           eliminate layout shift when the state changes. */
         min-width: 8.5rem;
         text-align: center;
       }
@@ -647,7 +631,6 @@
         color: var(--text-faint);
         margin: 0 0 1.5rem;
       }
-      /* Header row for a form field: label on the left, action on the right */
       .field-head {
         display: flex;
         align-items: baseline;
@@ -673,9 +656,6 @@
       }
       .field-action:hover {
         color: var(--brand-fg-strong);
-      }
-      .field-action:active {
-        transform: scale(0.96);
       }
       .faq {
         margin-top: 1.5rem;
@@ -722,8 +702,6 @@
         font-size: 0.85em;
         color: var(--text);
       }
-      /* Footer sits directly under content — the flex column on <body>
-         no longer stretches it to the viewport bottom. */
       footer {
         max-width: 38rem;
         width: 100%;
@@ -1051,12 +1029,7 @@
           reduceMotion =
             typeof matchMedia === "function" &&
             matchMedia("(prefers-reduced-motion: reduce)").matches,
-          // Two pools of preview lead-ins, each entry is [prefix, tail].
-          // Everything here is written to feel like a message a real
-          // person would send in a Discord DM, not a form label.
-          //
-          // Absolute pool: prepositions ("for", "on", "at", ":") let
-          // these swallow any date/time format without weird grammar.
+
           PHRASES_ABS = [
             ["Reminder set for", "."],
             ["Save the date:", ""],
@@ -1084,20 +1057,11 @@
             ["That'd be", "."],
             ["So, about", "."],
           ];
-
-        // Pick one phrase per pool on load — stays stable across format
-        // changes so the copy doesn't jitter, but the absolute?relative
-        // pair swaps in seamlessly when the user switches to/from R.
         function pickPhrase(pool) {
           return pool[(Math.random() * pool.length) | 0];
         }
         const absPhrase = pickPhrase(PHRASES_ABS),
           relPhrase = pickPhrase(PHRASES_REL);
-
-        // Track selected format via change listeners ? avoids a
-        // `.pill-input:checked` querySelector on every paint.
-        // Persisted across visits via localStorage; wrapped in try/catch
-        // so private-mode Safari (where storage throws) still works.
         const STORE_KEY = "dtg.fmt";
         let selectedFmt = "D";
         try {
