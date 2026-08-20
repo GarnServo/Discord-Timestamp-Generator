@@ -87,13 +87,9 @@
         --text-muted: #96989d;
         --text-faint: #9fa1aa;
         --brand: #5865f2;
-        --brand-hover: #4752c4;
         --brand-hover: color-mix(in srgb, var(--brand) 80%, black);
-        --brand-soft: rgba(88, 101, 242, 0.16);
         --brand-soft: color-mix(in srgb, var(--brand) 16%, transparent);
-        --brand-soft-strong: rgba(88, 101, 242, 0.28);
         --brand-soft-strong: color-mix(in srgb, var(--brand) 28%, transparent);
-        --brand-fg-strong: #9aa4f7;
         --brand-fg-strong: color-mix(in srgb, var(--brand) 40%, white);
         --success: #23a55a;
         --radius-lg: 16px;
@@ -121,7 +117,6 @@
           --text: #06070a;
           --text-muted: #4e5058;
           --text-faint: #5c5e66;
-          --brand-fg-strong: #2f3ba8;
           --brand-fg-strong: color-mix(in srgb, var(--brand) 55%, black);
         }
       }
@@ -1026,10 +1021,7 @@
           SENT_OPTS = { hour: "numeric", minute: "2-digit" },
           locale = navigator.language || "en",
           fmtCache = new Map(),
-          reduceMotion =
-            typeof matchMedia === "function" &&
-            matchMedia("(prefers-reduced-motion: reduce)").matches,
-
+          reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches,
           PHRASES_ABS = [
             ["Reminder set for", "."],
             ["Save the date:", ""],
@@ -1042,11 +1034,6 @@
             ["Get hyped for", "!"],
             ["Deadline:", ""],
           ],
-          // Relative pool: tense-neutral wrappers only — must work with
-          // both "in 32 minutes" (future) and "2 days ago" (past).
-          // Verbs like "starts" or "happening" break the past case, so
-          // we lean on natural chat phrasings that reference the moment
-          // as a noun instead.
           PHRASES_REL = [
             ["That's", "."],
             ["Which is", "."],
@@ -1057,11 +1044,13 @@
             ["That'd be", "."],
             ["So, about", "."],
           ];
+
         function pickPhrase(pool) {
           return pool[(Math.random() * pool.length) | 0];
         }
         const absPhrase = pickPhrase(PHRASES_ABS),
           relPhrase = pickPhrase(PHRASES_REL);
+
         const STORE_KEY = "dtg.fmt";
         let selectedFmt = "D";
         try {
@@ -1089,7 +1078,6 @@
         }
 
         function relativeParts(date) {
-          // Thresholds match Discord's own rounding buckets
           const s = (-(Date.now() - date.getTime()) / 1e3) | 0,
             a = Math.abs(s);
           if (a > 2592e4) return { d: Math.round(s / 31536e3), u: "years" };
@@ -1146,8 +1134,6 @@
 
           codeEl.value = "<t:" + unix + ":" + selectedFmt + ">";
 
-          // Pick the right phrase pair for the current format and update
-          // only if it changed (only fires when toggling to/from R).
           const phrase = selectedFmt === "R" ? relPhrase : absPhrase;
           if (phraseEl.firstChild.data !== phrase[0]) {
             phraseEl.firstChild.data = phrase[0];
@@ -1159,8 +1145,6 @@
             if (!reduceMotion) previewEl.animate(fadeFrames, fadeOpts);
           }
 
-          // Tooltip always shows the full long-format date, matching what
-          // Discord's own client renders when you hover a timestamp.
           const tipText =
             selectedFmt === "F" ? rendered : render("F", date, tz);
           if (previewTipEl.textContent !== tipText) {
@@ -1190,8 +1174,6 @@
             pad2(n.getMonth() + 1) +
             "-" +
             pad2(n.getDate());
-          // Include seconds so "reset to current time" is exact to the
-          // second. `step="1"` on the input means the value is preserved.
           hmEl.value =
             pad2(n.getHours()) +
             ":" +
@@ -1201,12 +1183,9 @@
           schedule();
         }
 
-        // Delegated change handler covers date, time, timezone and all
-        // seven radios in a single listener — one less closure per pill.
         document
           .getElementById("generator")
           .addEventListener("change", function (ev) {
-            // Radios all share name="t" — cheaper than classList lookup.
             if (ev.target.name === "t") {
               selectedFmt = ev.target.value;
               try {
@@ -1227,13 +1206,9 @@
           try {
             await navigator.clipboard.writeText(codeEl.value);
           } catch (_) {
+            ok = false;
             codeEl.focus();
             codeEl.select();
-            try {
-              ok = document.execCommand && document.execCommand("copy");
-            } catch (__) {
-              ok = false;
-            }
           }
           if (ok) {
             copyBtn.classList.add("copied");
@@ -1248,9 +1223,6 @@
           }, 2e3);
         });
 
-        // Apply the persisted format to the DOM so the correct pill is
-        // visually checked before first paint. The radio's `checked`
-        // attribute in HTML is a fallback for the very-first visit.
         const savedRadio = document.getElementById("fmt-" + selectedFmt);
         if (savedRadio) savedRadio.checked = true;
 
