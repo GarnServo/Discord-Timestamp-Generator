@@ -8,7 +8,6 @@
       name="description"
       content="Generate Discord timestamp codes in seconds. Pick a date and time, choose a display format, and copy a <t:...> tag that shows correctly in everyone's own timezone."
     />
-    <meta name="theme-color" content="#1e1f22" />
     <meta
       name="theme-color"
       content="#1e1f22"
@@ -1115,7 +1114,7 @@
         let copyTimeout;
 
         function withTz(base, tz) {
-          return tz ? Object.assign({}, base, { timeZone: tz }) : base;
+          return tz ? { ...base, timeZone: tz } : base;
         }
         function getFmt(key, tz) {
           const cacheKey = tz ? key + "@" + tz : key;
@@ -1205,13 +1204,16 @@
 
           // Tooltip always shows the full long-format date, matching what
           // Discord's own client renders when you hover a timestamp.
-          const tipText = render("F", date, tz);
+          const tipText =
+            selectedFmt === "F" ? rendered : render("F", date, tz);
           if (previewTipEl.textContent !== tipText) {
             previewTipEl.textContent = tipText;
           }
 
           examples.forEach(function (el) {
-            el.textContent = render(el.getAttribute("data-fmt"), date, tz);
+            const fmt = el.getAttribute("data-fmt");
+            el.textContent =
+              fmt === selectedFmt ? rendered : render(fmt, date, tz);
           });
 
           sentAtEl.textContent = getFmt("__sent__", tz).format(new Date());
