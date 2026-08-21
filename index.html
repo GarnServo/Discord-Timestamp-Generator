@@ -1203,14 +1203,14 @@
       }
 
       function nowLocalIsoParts() {
-        const iso = Temporal.Now.plainDateTimeISO().toString({
-          smallestUnit: "second",
-        });
-        return { date: iso.slice(0, 10), time: iso.slice(11, 19) };
+        const now = Temporal.Now.zonedDateTimeISO(LOCAL_TZ).toPlainDateTime();
+        return {
+          date: now.toPlainDate().toString(),
+          time: now.toPlainTime().toString({ smallestUnit: "second" }),
+        };
       }
 
-      function relativeText(zdt) {
-        const now = Temporal.Now.zonedDateTimeISO(LOCAL_TZ);
+      function relativeText(zdt, now = Temporal.Now.zonedDateTimeISO(LOCAL_TZ)) {
         const d = now.until(zdt, { largestUnit: "years", smallestUnit: "seconds" });
         for (const unit of ["years", "months", "days", "hours", "minutes", "seconds"]) {
           if (d[unit] !== 0 || unit === "seconds") {
@@ -1219,8 +1219,8 @@
         }
       }
 
-      function render(fmt, zdt, tz) {
-        if (fmt === "R") return relativeText(zdt);
+      function render(fmt, zdt, tz, now) {
+        if (fmt === "R") return relativeText(zdt, now);
         const targetLocale = tz && TZ_LOCALES[tz] ? TZ_LOCALES[tz] : undefined;
         return getFmt(fmt, tz, targetLocale).format(zdt.epochMilliseconds);
       }
@@ -1247,6 +1247,8 @@
       function paint(opts = {}) {
         const zdt = readInstant();
         if (!zdt) return;
+        const instant = zdt.toInstant();
+        const now = Temporal.Now.zonedDateTimeISO(LOCAL_TZ);
         const ms = zdt.epochMilliseconds;
         const tz = activeTz();
         const tzKey = tz || "";
@@ -1254,9 +1256,10 @@
         const tzChanged = tzKey !== lastTzKey || opts.force;
         const fmtChanged = state.fmt !== lastFmt || opts.force;
 
-        const rendered = render(state.fmt, zdt, tz);
+        const rendered = render(state.fmt, zdt, tz, now);
 
-        const codeVal = `<t:${(ms / 1000) | 0}:${state.fmt}>`;
+        const epochSeconds = Math.floor(instant.epochMilliseconds / 1000);
+        const codeVal = `<t:${epochSeconds}:${state.fmt}>`;
         if (codeEl.value !== codeVal) codeEl.value = codeVal;
 
         const mode = state.fmt === "R" ? "rel" : "abs";
@@ -1275,7 +1278,7 @@
 
         if (dateChanged || tzChanged) {
           for (const [fmt, el] of exampleByFmt) {
-            el.textContent = render(fmt, zdt, tz);
+            el.textContent = render(fmt, zdt, tz, now);
           }
         } else if (fmtChanged) {
           
@@ -1283,24 +1286,24 @@
           if (sel) sel.textContent = rendered;
         }
 
-        updateSentAt(tz);
+        updateSentAt(tz, now.toInstant());
 
         if (!copyTimeout) {
           copyBtn.classList.remove("copied");
           copyLabel.textContent = "Copy code";
         }
 
-        scheduleRelTick(zdt);
+        scheduleRelTick(zdt, instant);
 
         lastDateKey = ms;
         lastTzKey = tzKey;
         lastFmt = state.fmt;
       }
 
-      function scheduleRelTick(zdt) {
+      function scheduleRelTick(zdt, instant) {
         clearTimeout(relTicker);
         if (state.fmt !== "R") return;
-        const diffMs = Math.abs(zdt.epochMilliseconds - Date.now());
+        const diffMs = Math.abs(zdt.epochMilliseconds - instant.epochMilliseconds);
         
         const delay = diffMs < 60000 ? 1000 : 60000;
         relTicker = setTimeout(() => {
@@ -1316,7 +1319,7 @@
           updatePreviewText(txt, false);
           const sel = exampleByFmt.get("R");
           if (sel) sel.textContent = txt;
-          scheduleRelTick(z);
+          scheduleRelTick(z, z.toInstant());
         }, delay);
       }
 
@@ -1453,15 +1456,17 @@
         else schedulePaint({ force: true });
       });
 
-      function updateSentAt(tz) {
-        sentAtEl.textContent = getFmt("s", tz).format(Date.now());
+      function updateSentAt(tz, instant = Temporal.Now.instant()) {
+        sentAtEl.textContent = getFmt("s", tz).format(instant.epochMilliseconds);
       }
       
       function tickClock() {
         if (document.visibilityState === "visible") updateSentAt(activeTz());
-        setTimeout(tickClock, 60_000 - (Date.now() % 60_000));
+        const now = Temporal.Now.instant().epochMilliseconds;
+        setTimeout(tickClock, 60_000 - (now % 60_000));
       }
-      setTimeout(tickClock, 60_000 - (Date.now() % 60_000));
+      const initialNow = Temporal.Now.instant().epochMilliseconds;
+      setTimeout(tickClock, 60_000 - (initialNow % 60_000));
 
       loadState();
       const savedRadio = radioByFmt.get(state.fmt);
