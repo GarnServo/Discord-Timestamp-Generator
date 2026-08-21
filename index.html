@@ -20,6 +20,10 @@
     />
     <meta name="color-scheme" content="dark light" />
     <meta name="robots" content="index, follow" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none';"
+    />
     <link
       rel="canonical"
       href="https://garnservo.github.io/Discord-Timestamp-Generator/"
@@ -76,21 +80,27 @@
     </script>
     <style>
       :root {
-        --bg: #1e1f22;
-        --bg-card: #2b2d31;
-        --bg-elevated: #313338;
-        --bg-input: #1e1f22;
-        --border: #3b3d43;
-        --border-subtle: #35373c;
-        --border-hover: #54565e;
-        --text: #f2f3f5;
-        --text-muted: #96989d;
-        --text-faint: #9fa1aa;
+        color-scheme: dark light;
+        --bg: light-dark(#f5f6f8, #1e1f22);
+        --bg-card: light-dark(#ffffff, #2b2d31);
+        --bg-elevated: light-dark(#f2f3f5, #313338);
+        --bg-input: light-dark(#ffffff, #1e1f22);
+        --border: light-dark(#d8dade, #3b3d43);
+        --border-subtle: light-dark(#e3e5e8, #35373c);
+        --border-hover: light-dark(#b6b9c0, #54565e);
+        --text: light-dark(#06070a, #f2f3f5);
+        --text-muted: light-dark(#4e5058, #b0b2b8);
+        --text-faint: light-dark(#5c5e66, #a8aab0);
+        --tooltip-bg: light-dark(#1e1f22, #111214);
+        --tooltip-fg: #f2f3f5;
         --brand: #5865f2;
         --brand-hover: color-mix(in srgb, var(--brand) 80%, black);
         --brand-soft: color-mix(in srgb, var(--brand) 16%, transparent);
         --brand-soft-strong: color-mix(in srgb, var(--brand) 28%, transparent);
-        --brand-fg-strong: color-mix(in srgb, var(--brand) 40%, white);
+        --brand-fg-strong: light-dark(
+          color-mix(in srgb, var(--brand) 55%, black),
+          color-mix(in srgb, var(--brand) 40%, white)
+        );
         --success: #23a55a;
         --radius-lg: 16px;
         --radius-md: 10px;
@@ -98,27 +108,15 @@
         --t-fast: 0.15s ease;
         --t-snap: 0.12s ease;
         --font-sans:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", "gg sans", "Noto Sans",
-          Helvetica, Arial, sans-serif;
+          -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica,
+          Arial, sans-serif;
         --font-mono:
           ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas,
           "Liberation Mono", monospace;
-        color-scheme: dark light;
       }
-      @media (prefers-color-scheme: light) {
-        :root {
-          --bg: #f5f6f8;
-          --bg-card: #ffffff;
-          --bg-elevated: #f2f3f5;
-          --bg-input: #ffffff;
-          --border: #d8dade;
-          --border-subtle: #e3e5e8;
-          --border-hover: #b6b9c0;
-          --text: #06070a;
-          --text-muted: #4e5058;
-          --text-faint: #5c5e66;
-          --brand-fg-strong: color-mix(in srgb, var(--brand) 55%, black);
-        }
+      html {
+        scrollbar-gutter: stable;
+        overflow-x: clip;
       }
       * {
         box-sizing: border-box;
@@ -145,10 +143,7 @@
         font-family: var(--font-sans);
         line-height: 1.5;
         -webkit-font-smoothing: antialiased;
-        min-height: 100vh;
-        min-height: 100svh;
-        position: relative;
-        overflow-x: hidden;
+        min-height: 100dvh;
         display: flex;
         flex-direction: column;
       }
@@ -176,60 +171,41 @@
         font-weight: 600;
         transform: translateY(-4rem);
         transition: transform var(--t-fast);
+
+        &:focus {
+          transform: translateY(0);
+        }
       }
-      .skip-link:focus {
-        transform: translateY(0);
-      }
-      a:focus-visible,
-      button:focus-visible,
-      input:focus-visible,
-      select:focus-visible,
-      summary:focus-visible {
-        outline: 0;
-        box-shadow:
-          0 0 0 2px var(--bg),
-          0 0 0 4px var(--brand);
+      :focus-visible {
+        outline: 2px solid var(--brand);
+        outline-offset: 2px;
         border-radius: 4px;
       }
-      body::before {
-        content: "";
-        position: fixed;
-        width: 60rem;
-        height: 60rem;
-        top: -30rem;
-        left: 50%;
-        transform: translateX(-50%);
-        background: radial-gradient(
-          circle,
-          var(--brand-soft) 0,
-          transparent 65%
-        );
-        pointer-events: none;
-        z-index: 0;
-        animation: drift 16s ease-in-out infinite;
-        contain: layout paint;
-      }
-      @media (max-width: 32rem), (hover: none) {
-        body::before {
-          display: none;
-        }
-      }
-      @keyframes drift {
-        0%,
-        100% {
-          transform: translateX(-50%) translateY(0) scale(1);
-        }
-        50% {
-          transform: translateX(-46%) translateY(2rem) scale(1.06);
-        }
-      }
       main {
-        position: relative;
-        z-index: 1;
         max-width: 38rem;
         margin: 0 auto;
         padding: 3.5rem 1.25rem 2rem;
         width: 100%;
+        container-type: inline-size;
+        container-name: shell;
+        --fmt-mode: abs;
+      }
+      
+      @container shell style(--fmt-mode: rel) {
+        .ts-chip {
+          background: color-mix(in srgb, var(--success) 18%, transparent);
+          color: color-mix(in srgb, var(--success) 65%, var(--text));
+
+          &:hover,
+          &:focus-visible {
+            background: color-mix(in srgb, var(--success) 30%, transparent);
+          }
+        }
+        @media not (prefers-reduced-motion: reduce) {
+          .status-dot {
+            animation: pulseDot 2s ease-in-out infinite;
+          }
+        }
       }
       header.hero {
         text-align: center;
@@ -247,13 +223,15 @@
         padding: 0.3rem 0.7rem;
         border-radius: 99px;
         margin-bottom: 1rem;
-      }
-      .eyebrow-dot {
-        width: 0.4rem;
-        height: 0.4rem;
-        border-radius: 50%;
-        background: var(--brand);
-        animation: pulseDot 2s ease-in-out infinite;
+
+        &::before {
+          content: "";
+          width: 0.4rem;
+          height: 0.4rem;
+          border-radius: 50%;
+          background: var(--brand);
+          animation: pulseDot 2s ease-in-out infinite;
+        }
       }
       h1 {
         font-size: 1.9rem;
@@ -274,16 +252,13 @@
       .message {
         border: 1px solid var(--border-subtle);
         background: var(--bg-card);
-      }
-      .faq,
-      .message {
         border-radius: var(--radius-md);
       }
       .card {
         border-radius: var(--radius-lg);
         padding: 1.75rem;
-        box-shadow: 0 20px 50px -25px rgba(0, 0, 0, 0.6);
-        contain: layout style;
+        box-shadow: 0 20px 50px -25px rgb(0 0 0 / 0.6);
+        contain: paint;
       }
       .field-row {
         display: grid;
@@ -299,8 +274,7 @@
         margin-bottom: 0.4rem;
       }
       #code,
-      .field input[type="date"],
-      .field input[type="time"] {
+      .field input {
         background: var(--bg-input);
         color: var(--text);
         border: 1px solid var(--border);
@@ -309,16 +283,16 @@
           border-color var(--t-fast),
           box-shadow var(--t-fast);
       }
-      .field input[type="date"],
-      .field input[type="time"] {
+      .field input {
         width: 100%;
         padding: 0.65rem 0.7rem;
         font-family: var(--font-sans);
         font-size: 0.92rem;
         accent-color: var(--brand);
-      }
-      .field input:hover {
-        border-color: var(--border-hover);
+
+        &:hover {
+          border-color: var(--border-hover);
+        }
       }
       #code:focus,
       #tz:focus,
@@ -368,6 +342,29 @@
           background var(--t-fast);
         user-select: none;
         -webkit-tap-highlight-color: transparent;
+
+        &:active {
+          transform: scale(0.97);
+        }
+        &:has(input:focus-visible) {
+          outline: 2px solid var(--brand);
+          outline-offset: 2px;
+        }
+        @media (hover: hover) {
+          &:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-1px);
+          }
+        }
+      }
+      
+      [data-ready] .pill:has(input:checked) {
+        background: var(--brand-soft-strong);
+        border-color: var(--brand);
+
+        & .pill-example {
+          color: var(--brand-fg-strong);
+        }
       }
       .pill-label {
         font-size: 0.82rem;
@@ -378,26 +375,6 @@
         color: var(--text-faint);
         font-family: var(--font-mono);
         min-height: 1em;
-      }
-      @media (hover: hover) {
-        .pill:hover {
-          border-color: var(--border-hover);
-          transform: translateY(-1px);
-        }
-      }
-      .pill-input:checked + .pill {
-        background: var(--brand-soft-strong);
-        border-color: var(--brand);
-      }
-      .pill-input:checked + .pill .pill-example {
-        color: var(--brand-fg-strong);
-      }
-      .pill-input:focus-visible + .pill {
-        outline: 2px solid var(--brand);
-        outline-offset: 2px;
-      }
-      .pill:active {
-        transform: scale(0.97);
       }
       .preview-block {
         margin-top: 0.25rem;
@@ -427,16 +404,18 @@
         transition:
           border-color var(--t-fast),
           color var(--t-fast);
-      }
-      #tz:hover {
-        border-color: var(--border-hover);
-        color: var(--text);
+
+        &:hover {
+          border-color: var(--border-hover);
+          color: var(--text);
+        }
       }
       .message {
         display: flex;
         gap: 0.75rem;
         background: var(--bg-elevated);
         padding: 0.9rem 1rem;
+        contain: content;
       }
       .avatar {
         position: relative;
@@ -451,9 +430,6 @@
         font-weight: 700;
         font-size: 0.85rem;
         color: #fff;
-      }
-      .avatar::before {
-        content: "TS";
       }
       .status-dot {
         position: absolute;
@@ -489,7 +465,7 @@
         word-break: break-word;
       }
       .ts-chip {
-        position: relative;
+        anchor-name: --ts-chip;
         display: inline-block;
         background: var(--brand-soft);
         color: var(--brand-fg-strong);
@@ -497,54 +473,62 @@
         padding: 0 2px;
         cursor: pointer;
         transition: background var(--t-fast);
-      }
-      .ts-chip:hover,
-      .ts-chip:focus {
-        background: var(--brand-soft-strong);
-        outline: 0;
+
+        &:hover,
+        &:focus-visible {
+          background: var(--brand-soft-strong);
+        }
+        &:hover .ts-chip-tip,
+        &:focus-visible .ts-chip-tip {
+          opacity: 1;
+          translate: 0 -0.25rem;
+          visibility: visible;
+          transition-delay: 0s;
+        }
       }
       .ts-chip-tip {
         position: absolute;
-        bottom: calc(100% + 6px);
-        left: 50%;
-        transform: translate(-50%, 4px);
-        white-space: nowrap;
-        background: #111214;
-        color: #f2f3f5;
-        font-family: var(--font-sans);
-        font-size: 0.78rem;
-        font-weight: 500;
+        position-anchor: --ts-chip;
+        bottom: anchor(top);
+        justify-self: anchor-center;
+        margin-bottom: 0.1rem;
         padding: 0.35rem 0.6rem;
+        background: var(--tooltip-bg);
+        color: var(--tooltip-fg);
+        font: 500 0.78rem/1.4 var(--font-sans);
         border-radius: 5px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+        box-shadow: 0 4px 12px rgb(0 0 0 / 0.35);
         opacity: 0;
-        pointer-events: none;
+        visibility: hidden;
         transition:
-          opacity 0.12s ease 0s,
-          transform 0.12s ease 0s;
+          opacity 0.12s ease,
+          translate 0.12s ease,
+          visibility 0s linear 0.12s;
+        white-space: nowrap;
+        max-inline-size: min(90vw, 24rem);
         z-index: 5;
-      }
-      .ts-chip-tip::after {
-        content: "";
-        position: absolute;
-        top: 100%;
-        left: 50%;
-        transform: translateX(-50%);
-        border: 5px solid transparent;
-        border-top-color: #111214;
-      }
-      .ts-chip:hover .ts-chip-tip,
-      .ts-chip:focus .ts-chip-tip {
-        opacity: 1;
-        transform: translate(-50%, 0);
-        transition-delay: 0.25s;
-      }
-      @media (prefers-color-scheme: light) {
-        .ts-chip-tip {
-          background: #1e1f22;
+        pointer-events: none;
+
+        &::after {
+          content: "";
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          border: 5px solid transparent;
+          border-top-color: var(--tooltip-bg);
         }
-        .ts-chip-tip::after {
-          border-top-color: #1e1f22;
+      }
+      @media (forced-colors: active) {
+        .ts-chip-tip {
+          border: 1px solid CanvasText;
+        }
+        .status-dot {
+          background: Highlight;
+          border-color: Canvas;
+        }
+        .pill:has(input:checked) {
+          border: 2px solid Highlight;
         }
       }
       .output-row {
@@ -558,6 +542,7 @@
         padding: 0.65rem 0.8rem;
         font-family: var(--font-mono);
         font-size: 0.9rem;
+        field-sizing: content;
       }
       button {
         font-family: var(--font-sans);
@@ -569,53 +554,67 @@
         transition:
           transform var(--t-snap),
           background var(--t-fast);
+
+        &:active {
+          transform: scale(0.96);
+        }
       }
-      button:active {
-        transform: scale(0.96);
-      }
-      #copy {
+      .btn-primary {
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 0.4rem;
         white-space: nowrap;
         background: var(--brand);
         color: #fff;
         padding: 0.65rem 1.1rem;
+
+        &:hover {
+          background: var(--brand-hover);
+        }
       }
-      #copy:hover {
-        background: var(--brand-hover);
-      }
-      #copy.copied {
-        background: var(--success);
+      #copy {
+        &.copied {
+          background: var(--success);
+
+          & .clip {
+            display: none;
+          }
+          & .check {
+            display: inline-block;
+
+            @media not (prefers-reduced-motion: reduce) {
+              animation: pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            }
+          }
+        }
       }
       .copy-icon {
         width: 1em;
         height: 1em;
         flex: none;
+        display: inline-block;
+        background: currentColor;
+        -webkit-mask: var(--icon) center / contain no-repeat;
+        mask: var(--icon) center / contain no-repeat;
+
+        &.check {
+          display: none;
+          --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 13l4 4L19 7'/%3E%3C/svg%3E");
+        }
+        &.clip {
+          --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2'%3E%3Crect x='9' y='9' width='11' height='11' rx='2'/%3E%3Cpath d='M5 15V5a2 2 0 0 1 2-2h10'/%3E%3C/svg%3E");
+        }
       }
-      .copy-icon svg {
-        display: block;
-        width: 100%;
-        height: 100%;
-      }
-      .copy-icon g {
-        transform-box: fill-box;
-        transform-origin: center;
-        transition:
-          opacity var(--t-fast),
-          transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-      }
-      .copy-icon .check {
-        opacity: 0;
-        transform: scale(0.6) rotate(-8deg);
-      }
-      #copy.copied .clip {
-        opacity: 0;
-        transform: scale(0.6) rotate(8deg);
-      }
-      #copy.copied .check {
-        opacity: 1;
-        transform: scale(1) rotate(0);
+      @keyframes pop {
+        from {
+          transform: scale(0.6) rotate(-8deg);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1) rotate(0);
+          opacity: 1;
+        }
       }
       .copy-label {
         display: inline-block;
@@ -649,27 +648,35 @@
         text-transform: uppercase;
         cursor: pointer;
         transition: color var(--t-fast);
-      }
-      .field-action:hover {
-        color: var(--brand-fg-strong);
+
+        &:hover {
+          color: var(--brand-fg-strong);
+        }
       }
       .faq {
         margin-top: 1.5rem;
         overflow: hidden;
-      }
-      .faq summary {
-        cursor: pointer;
-        list-style: none;
-        padding: 1rem 1.25rem;
-        font-weight: 600;
-        font-size: 0.92rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-      }
-      .faq summary::-webkit-details-marker {
-        display: none;
+        content-visibility: auto;
+        contain-intrinsic-size: 0 6rem;
+
+        & summary {
+          cursor: pointer;
+          list-style: none;
+          padding: 1rem 1.25rem;
+          font-weight: 600;
+          font-size: 0.92rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
+
+          &::-webkit-details-marker {
+            display: none;
+          }
+        }
+        &[open] .faq-icon {
+          transform: rotate(45deg);
+        }
       }
       .faq-icon {
         flex: none;
@@ -678,25 +685,39 @@
         transition: transform 0.2s ease;
         line-height: 1;
       }
-      .faq[open] .faq-icon {
-        transform: rotate(45deg);
-      }
       .faq-content {
         padding: 0 1.25rem 1.25rem;
         color: var(--text-muted);
         font-size: 0.9rem;
+
+        & p + p {
+          margin-top: 0.75rem;
+        }
+        & code {
+          background: var(--bg-elevated);
+          border: 1px solid var(--border-subtle);
+          padding: 0.05rem 0.35rem;
+          border-radius: 4px;
+          font-family: var(--font-mono);
+          font-size: 0.85em;
+          color: var(--text);
+        }
       }
-      .faq-content p + p {
-        margin-top: 0.75rem;
-      }
-      .faq-content code {
-        background: var(--bg-elevated);
-        border: 1px solid var(--border-subtle);
-        padding: 0.05rem 0.35rem;
-        border-radius: 4px;
-        font-family: var(--font-mono);
-        font-size: 0.85em;
-        color: var(--text);
+      .kbd-help {
+        margin-top: 1rem;
+        font-size: 0.78rem;
+        color: var(--text-faint);
+
+        & kbd {
+          display: inline-block;
+          padding: 0.05rem 0.4rem;
+          background: var(--bg-elevated);
+          border: 1px solid var(--border-subtle);
+          border-radius: 4px;
+          font-family: var(--font-mono);
+          font-size: 0.85em;
+          color: var(--text);
+        }
       }
       footer {
         max-width: 38rem;
@@ -706,12 +727,14 @@
         text-align: center;
         font-size: 0.78rem;
         color: var(--text-faint);
-      }
-      footer a {
-        color: var(--text-muted);
-      }
-      footer a:hover {
-        color: var(--text);
+
+        & a {
+          color: var(--text-muted);
+
+          &:hover {
+            color: var(--text);
+          }
+        }
       }
       @keyframes pulseDot {
         0%,
@@ -722,7 +745,7 @@
           opacity: 0.35;
         }
       }
-      @media (max-width: 32rem) {
+      @container shell (max-width: 32rem) {
         .field-row {
           grid-template-columns: 1fr;
         }
@@ -735,7 +758,7 @@
         .output-row {
           flex-direction: column;
         }
-        #copy {
+        .btn-primary {
           justify-content: center;
         }
       }
@@ -748,27 +771,47 @@
           transition-duration: 0.01ms !important;
         }
       }
+      #previewText {
+        display: inline;
+      }
+      .noscript-msg {
+        max-width: 38rem;
+        margin: 1rem auto;
+        padding: 1rem;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        text-align: center;
+      }
     </style>
   </head>
   <body>
     <a href="#main" class="skip-link">Skip to content</a>
-    <main id="main">
+    <main id="main" tabindex="-1">
       <header class="hero">
-        <span class="eyebrow"
-          ><span class="eyebrow-dot" aria-hidden="true"></span> Discord message
-          formatting</span
-        >
+        <span class="eyebrow">Discord message formatting</span>
         <h1>Discord Timestamp Generator</h1>
         <p class="lede">
           Pick a date and time, choose how it should read, and copy a code that
           shows correctly for everyone in their own timezone.
         </p>
       </header>
-      <section class="card" id="generator" aria-label="Timestamp generator">
+      <form
+        class="card"
+        id="generator"
+        aria-label="Timestamp generator"
+        autocomplete="off"
+      >
         <div class="field-row">
           <div class="field">
             <label for="d">Date</label>
-            <input type="date" id="d" name="date" autocomplete="off" />
+            <input
+              type="date"
+              id="d"
+              name="date"
+              autocomplete="off"
+              aria-describedby="fields-hint"
+            />
           </div>
           <div class="field">
             <div class="field-head">
@@ -777,7 +820,7 @@
                 type="button"
                 id="current"
                 class="field-action"
-                title="Set to the current date and time"
+                aria-keyshortcuts="n"
               >
                 Use current time
               </button>
@@ -788,94 +831,103 @@
               name="time"
               step="1"
               autocomplete="off"
+              aria-describedby="fields-hint"
             />
           </div>
         </div>
-        <p class="hint">
+        <p class="hint" id="fields-hint">
           Uses your local timezone. The timestamp converts automatically for
-          everyone who reads it.
+          everyone who reads it. Press
+          <kbd>N</kbd> to reset to now.
         </p>
         <fieldset>
           <legend>Format</legend>
-          <div class="pills">
-            <input
-              class="pill-input"
-              type="radio"
-              name="t"
-              id="fmt-t"
-              value="t"
-            />
-            <label class="pill" for="fmt-t"
-              ><span class="pill-label">Short Time</span
-              ><span class="pill-example" data-fmt="t"></span
-            ></label>
-            <input
-              class="pill-input"
-              type="radio"
-              name="t"
-              id="fmt-T"
-              value="T"
-            />
-            <label class="pill" for="fmt-T"
-              ><span class="pill-label">Long Time</span
-              ><span class="pill-example" data-fmt="T"></span
-            ></label>
-            <input
-              class="pill-input"
-              type="radio"
-              name="t"
-              id="fmt-d"
-              value="d"
-            />
-            <label class="pill" for="fmt-d"
-              ><span class="pill-label">Short Date</span
-              ><span class="pill-example" data-fmt="d"></span
-            ></label>
-            <input
-              class="pill-input"
-              type="radio"
-              name="t"
-              id="fmt-D"
-              value="D"
-              checked
-            />
-            <label class="pill" for="fmt-D"
-              ><span class="pill-label">Long Date</span
-              ><span class="pill-example" data-fmt="D"></span
-            ></label>
-            <input
-              class="pill-input"
-              type="radio"
-              name="t"
-              id="fmt-f"
-              value="f"
-            />
-            <label class="pill" for="fmt-f"
-              ><span class="pill-label">Long Date + Time</span
-              ><span class="pill-example" data-fmt="f"></span
-            ></label>
-            <input
-              class="pill-input"
-              type="radio"
-              name="t"
-              id="fmt-F"
-              value="F"
-            />
-            <label class="pill" for="fmt-F"
-              ><span class="pill-label">Full Date + Time</span
-              ><span class="pill-example" data-fmt="F"></span
-            ></label>
-            <input
-              class="pill-input"
-              type="radio"
-              name="t"
-              id="fmt-R"
-              value="R"
-            />
-            <label class="pill" for="fmt-R"
-              ><span class="pill-label">Relative</span
-              ><span class="pill-example" data-fmt="R"></span
-            ></label>
+          <div class="pills" role="presentation">
+            <label class="pill" for="fmt-t">
+              <input
+                class="pill-input"
+                type="radio"
+                name="t"
+                id="fmt-t"
+                value="t"
+                aria-keyshortcuts="t"
+              />
+              <span class="pill-label">Short Time</span>
+              <span class="pill-example" data-fmt="t" aria-hidden="true"></span>
+            </label>
+            <label class="pill" for="fmt-T">
+              <input
+                class="pill-input"
+                type="radio"
+                name="t"
+                id="fmt-T"
+                value="T"
+                aria-keyshortcuts="Shift+T"
+              />
+              <span class="pill-label">Long Time</span>
+              <span class="pill-example" data-fmt="T" aria-hidden="true"></span>
+            </label>
+            <label class="pill" for="fmt-d">
+              <input
+                class="pill-input"
+                type="radio"
+                name="t"
+                id="fmt-d"
+                value="d"
+                aria-keyshortcuts="d"
+              />
+              <span class="pill-label">Short Date</span>
+              <span class="pill-example" data-fmt="d" aria-hidden="true"></span>
+            </label>
+            <label class="pill" for="fmt-D">
+              <input
+                class="pill-input"
+                type="radio"
+                name="t"
+                id="fmt-D"
+                value="D"
+                checked
+                aria-keyshortcuts="Shift+D"
+              />
+              <span class="pill-label">Long Date</span>
+              <span class="pill-example" data-fmt="D" aria-hidden="true"></span>
+            </label>
+            <label class="pill" for="fmt-f">
+              <input
+                class="pill-input"
+                type="radio"
+                name="t"
+                id="fmt-f"
+                value="f"
+                aria-keyshortcuts="f"
+              />
+              <span class="pill-label">Long Date + Time</span>
+              <span class="pill-example" data-fmt="f" aria-hidden="true"></span>
+            </label>
+            <label class="pill" for="fmt-F">
+              <input
+                class="pill-input"
+                type="radio"
+                name="t"
+                id="fmt-F"
+                value="F"
+                aria-keyshortcuts="Shift+F"
+              />
+              <span class="pill-label">Full Date + Time</span>
+              <span class="pill-example" data-fmt="F" aria-hidden="true"></span>
+            </label>
+            <label class="pill" for="fmt-R">
+              <input
+                class="pill-input"
+                type="radio"
+                name="t"
+                id="fmt-R"
+                value="R"
+                aria-keyshortcuts="r"
+              />
+              <span class="pill-label">Relative</span>
+              <span class="pill-example" data-fmt="R" aria-hidden="true"></span>
+            </label>
           </div>
         </fieldset>
         <div class="output-row">
@@ -883,41 +935,30 @@
           <input
             readonly
             id="code"
-            title="Click to select, then copy"
             spellcheck="false"
             autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            inputmode="none"
+            aria-live="polite"
           />
-          <button type="button" id="copy">
-            <span class="copy-icon" aria-hidden="true">
-              <svg
-                viewBox="0 0 24 24"
-                width="16"
-                height="16"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <g class="clip">
-                  <rect x="9" y="9" width="11" height="11" rx="2" />
-                  <path d="M5 15V5a2 2 0 0 1 2-2h10" />
-                </g>
-                <g class="check" stroke-width="2.5">
-                  <path
-                    d="M5 13l4 4L19 7"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </g>
-              </svg>
-            </span>
-            <span class="copy-label">Copy code</span>
+          <button
+            type="button"
+            id="copy"
+            class="btn-primary"
+          >
+            <span class="copy-icon clip" aria-hidden="true"></span>
+            <span class="copy-icon check" aria-hidden="true"></span>
+            <span class="copy-label" id="copy-label" role="status"
+              >Copy code</span
+            >
           </button>
         </div>
-        <div class="preview-block">
+        <div class="preview-block" role="group" aria-labelledby="preview-heading">
+          <h2 id="preview-heading" class="sr-only">Preview</h2>
           <div class="preview-header">
-            <span class="preview-label">Preview</span>
-            <label for="tz" class="sr-only">Preview in timezone</label>
-            <select id="tz" autocomplete="off">
+            <span class="preview-label" aria-hidden="true">Preview</span>
+            <select id="tz" autocomplete="off" aria-label="Preview in timezone">
               <option value="local">My local time</option>
               <option value="UTC">UTC</option>
               <option value="America/Los_Angeles">Los Angeles</option>
@@ -931,6 +972,7 @@
           </div>
           <div class="message">
             <div class="avatar" aria-hidden="true">
+              <span>TS</span>
               <span class="status-dot"></span>
             </div>
             <div class="message-body">
@@ -940,17 +982,26 @@
               </div>
               <p class="message-text">
                 <span id="phrase">Reminder set for</span>
-                <span class="ts-chip" tabindex="0" aria-describedby="previewTip"
-                  ><span id="previewText" role="status">…</span
-                  ><span id="previewTip" class="ts-chip-tip" role="tooltip"
+                <span
+                  class="ts-chip"
+                  id="chip"
+                  tabindex="0"
+                  aria-label="Timestamp preview — hover or focus for full details"
+                  aria-describedby="previewTip"
+                >
+                  <span id="previewText">…</span>
+                  <span
+                    id="previewTip"
+                    class="ts-chip-tip"
+                    role="tooltip"
                     >…</span
-                  ></span
-                ><span id="phraseTail">.</span>
+                  >
+                </span><span id="phraseTail">.</span>
               </p>
             </div>
           </div>
         </div>
-      </section>
+      </form>
       <details class="faq">
         <summary>
           What are Discord timestamps, and why use them?<span
@@ -981,6 +1032,13 @@
             week, and so on. Pick whichever fits the message, then paste the
             generated code straight into Discord.
           </p>
+          <p class="kbd-help">
+            Shortcuts: <kbd>T</kbd>/<kbd>⇧T</kbd> time, <kbd>D</kbd>/<kbd
+              >⇧D</kbd
+            >
+            date, <kbd>F</kbd>/<kbd>⇧F</kbd> long, <kbd>R</kbd> relative,
+            <kbd>N</kbd> reset to now, <kbd>⏎</kbd> in code field to copy.
+          </p>
         </div>
       </details>
       <footer>
@@ -993,229 +1051,442 @@
         >.
       </footer>
     </main>
-    <script>
-      !(function () {
-        "use strict";
-        const $ = (id) => document.getElementById(id),
-          dEl = $("d"),
-          hmEl = $("hm"),
-          codeEl = $("code"),
-          copyBtn = $("copy"),
-          copyLabel = copyBtn.querySelector(".copy-label"),
-          resetBtn = $("current"),
-          previewEl = $("previewText"),
-          previewTipEl = $("previewTip"),
-          phraseEl = $("phrase"),
-          phraseTailEl = $("phraseTail"),
-          sentAtEl = $("sentAt"),
-          examples = document.querySelectorAll(".pill-example"),
-          tzEl = $("tz"),
-          FORMATS = {
-            t: { timeStyle: "short" },
-            T: { timeStyle: "medium" },
-            d: { dateStyle: "short" },
-            D: { dateStyle: "long" },
-            f: { dateStyle: "long", timeStyle: "short" },
-            F: { dateStyle: "full", timeStyle: "short" },
-            R: { style: "long", numeric: "auto" },
-            s: { hour: "numeric", minute: "2-digit" },
-          },
-          locale = navigator.language || "en",
-          fmtCache = {},
-          reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches,
-          PHRASES_ABS = [
-            ["Reminder set for", "."],
-            ["Save the date:", ""],
-            ["See you on", "!"],
-            ["Countdown to", "."],
-            ["Locked in for", "."],
-            ["Marking my calendar for", "."],
-            ["Meeting is on", "."],
-            ["Party's on", "!"],
-            ["Get hyped for", "!"],
-            ["Deadline:", ""],
-          ],
-          PHRASES_REL = [
-            ["That's", "."],
-            ["Which is", "."],
-            ["Which means", "."],
-            ["So we're talking", "."],
-            ["Meaning,", "."],
-            ["Basically,", "."],
-            ["That'd be", "."],
-            ["So, about", "."],
-          ];
+    <noscript>
+      <div class="noscript-msg">Enable JavaScript to generate timestamp codes.</div>
+    </noscript>
+    <div id="a11y-status" class="sr-only" role="status" aria-live="polite"></div>
+    <script type="module">
+      "use strict";
 
-        function pickPhrase(pool) {
-          return pool[(Math.random() * pool.length) | 0];
-        }
-        const absPhrase = pickPhrase(PHRASES_ABS),
-          relPhrase = pickPhrase(PHRASES_REL);
+      const form = document.getElementById("generator");
+      const els = form.elements;
+      const dEl = els.date;
+      const hmEl = els.time;
+      const codeEl = document.getElementById("code");
+      const copyBtn = document.getElementById("copy");
+      const copyLabel = document.getElementById("copy-label");
+      const resetBtn = document.getElementById("current");
+      const previewEl = document.getElementById("previewText");
+      const previewTipEl = document.getElementById("previewTip");
+      const chipEl = document.getElementById("chip");
+      const phraseEl = document.getElementById("phrase");
+      const phraseTailEl = document.getElementById("phraseTail");
+      const sentAtEl = document.getElementById("sentAt");
+      const tzEl = document.getElementById("tz");
+      const mainEl = document.getElementById("main");
+      const examples = document.querySelectorAll(".pill-example");
+      const exampleByFmt = new Map(
+        Array.from(examples, (el) => [el.dataset.fmt, el]),
+      );
+      
+      const radioByFmt = new Map(
+        Array.from(examples, (el) => [
+          el.dataset.fmt,
+          document.getElementById("fmt-" + el.dataset.fmt),
+        ]),
+      );
 
-        const STORE_KEY = "dtg.fmt";
-        let selectedFmt = "D";
+      const FORMATS = {
+        t: { timeStyle: "short" },
+        T: { timeStyle: "medium" },
+        d: { dateStyle: "short" },
+        D: { dateStyle: "long" },
+        f: { dateStyle: "long", timeStyle: "short" },
+        F: { dateStyle: "full", timeStyle: "short" },
+        R: { style: "long", numeric: "auto" },
+        s: { hour: "numeric", minute: "2-digit" },
+      };
+      const locale = navigator.language || "en";
+      const reduceMotion = matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      const LOCAL_TZ = Temporal.Now.timeZoneId();
+      const STORE_KEY = "dtg.state";
+      const PHRASES_ABS = [
+        ["Reminder set for", "."],
+        ["Save the date:", ""],
+        ["See you on", "!"],
+        ["Countdown to", "."],
+        ["Locked in for", "."],
+        ["Marking my calendar for", "."],
+        ["Meeting is on", "."],
+        ["Party's on", "!"],
+        ["Get hyped for", "!"],
+        ["Deadline:", ""],
+      ];
+      const PHRASES_REL = [
+        ["That's", "."],
+        ["Which is", "."],
+        ["Which means", "."],
+        ["So we're talking", "."],
+        ["Meaning,", "."],
+        ["Basically,", "."],
+        ["That'd be", "."],
+        ["So, about", "."],
+      ];
+      
+      const TZ_LOCALES = {
+        "America/Los_Angeles": "en-US",
+        "America/New_York": "en-US",
+        "Europe/London": "en-GB",
+        "Europe/Berlin": "de-DE",
+        "Asia/Tokyo": "ja-JP",
+        "Asia/Kolkata": "en-IN",
+        "Australia/Sydney": "en-AU",
+        UTC: "en",
+      };
+      
+      const REL_UNITS = [
+        [31536000, "years"],
+        [2592000, "months"],
+        [86400, "days"],
+        [3600, "hours"],
+        [60, "minutes"],
+        [1, "seconds"],
+      ];
+
+      const state = {
+        fmt: "D",
+        tz: "local",
+      };
+      let copyTimeout;
+      let relTicker;
+      let tipDirty = true;
+
+      function loadState() {
         try {
-          const saved = localStorage.getItem(STORE_KEY);
-          if (saved && FORMATS[saved]) selectedFmt = saved;
-        } catch (_) {}
-        let copyTimeout;
+          const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
+          if (saved.fmt && FORMATS[saved.fmt]) state.fmt = saved.fmt;
+          if (saved.tz) state.tz = saved.tz;
+        } catch {}
+      }
 
-        function withTz(base, tz) {
-          return tz ? { ...base, timeZone: tz } : base;
+      let persistTimer;
+      function persistState() {
+        clearTimeout(persistTimer);
+        persistTimer = setTimeout(persistNow, 250);
+      }
+      function persistNow() {
+        clearTimeout(persistTimer);
+        persistTimer = 0;
+        try {
+          localStorage.setItem(STORE_KEY, JSON.stringify(state));
+        } catch {}
+      }
+      
+      addEventListener("pagehide", persistNow);
+
+      const fmtCache = new Map();
+      function getFmt(key, tz, localeOverride) {
+        const l = localeOverride || locale;
+        
+        const cacheKey =
+          l === locale ? `${key}|${tz || ""}` : `${l}|${key}|${tz || ""}`;
+        let f = fmtCache.get(cacheKey);
+        if (f) return f;
+        if (key === "R") {
+          f = new Intl.RelativeTimeFormat(l, FORMATS.R);
+        } else {
+          const opts = tz ? { ...FORMATS[key], timeZone: tz } : FORMATS[key];
+          f = new Intl.DateTimeFormat(l, opts);
         }
-        function getFmt(key, tz) {
-          const cacheKey = tz ? key + "@" + tz : key;
-          let f = fmtCache[cacheKey];
-          if (f) return f;
-          f =
-            key === "R"
-              ? new Intl.RelativeTimeFormat(locale, FORMATS.R)
-              : new Intl.DateTimeFormat(locale, withTz(FORMATS[key], tz));
-          fmtCache[cacheKey] = f;
-          return f;
-        }
+        fmtCache.set(cacheKey, f);
+        return f;
+      }
 
-        function relativeParts(date) {
-          const s = (-(Date.now() - date.getTime()) / 1e3) | 0,
-            a = Math.abs(s);
-          if (a > 2592e4) return { d: Math.round(s / 31536e3), u: "years" };
-          if (a > 216e4) return { d: Math.round(s / 2592e3), u: "months" };
-          if (a > 75600) return { d: Math.round(s / 86400), u: "days" };
-          if (a > 2640) return { d: Math.round(s / 3600), u: "hours" };
-          if (a > 30) return { d: Math.round(s / 60), u: "minutes" };
-          return { d: s, u: "seconds" };
-        }
+      getFmt("D");
+      getFmt("s");
 
-        function render(fmt, date, tz) {
-          if (fmt === "R") {
-            const p = relativeParts(date);
-            return getFmt("R").format(p.d, p.u);
-          }
-          return getFmt(fmt, tz).format(date);
-        }
-
-        const fadeFrames = [{ opacity: 0.4 }, { opacity: 1 }],
-          fadeOpts = { duration: 500, easing: "ease" };
-
-        function readDate() {
-          const dms = dEl.valueAsNumber,
-            tms = hmEl.valueAsNumber;
-          if (!Number.isFinite(dms) || !Number.isFinite(tms)) return null;
-          const d = new Date(dms);
-          return new Date(
-            d.getUTCFullYear(),
-            d.getUTCMonth(),
-            d.getUTCDate(),
-            (tms / 3.6e6) | 0,
-            ((tms / 6e4) | 0) % 60,
-            ((tms / 1e3) | 0) % 60,
+      function readInstant() {
+        const dStr = dEl.value;
+        const tStr = hmEl.value;
+        if (!dStr || !tStr) return null;
+        try {
+          return Temporal.PlainDateTime.from(`${dStr}T${tStr}`).toZonedDateTime(
+            LOCAL_TZ,
           );
+        } catch {
+          return null;
+        }
+      }
+
+      function nowLocalIsoParts() {
+        const iso = Temporal.Now.plainDateTimeISO().toString({
+          smallestUnit: "second",
+        });
+        return { date: iso.slice(0, 10), time: iso.slice(11, 19) };
+      }
+
+      function relativeText(zdt) {
+        const s = Math.round((zdt.epochMilliseconds - Date.now()) / 1000);
+        const a = Math.abs(s);
+        for (let i = 0; i < REL_UNITS.length; i++) {
+          const [div, unit] = REL_UNITS[i];
+          if (a >= div || unit === "seconds") {
+            return getFmt("R").format(Math.round(s / div), unit);
+          }
+        }
+        return "";
+      }
+
+      function render(fmt, zdt, tz) {
+        if (fmt === "R") return relativeText(zdt);
+        const targetLocale = tz && TZ_LOCALES[tz] ? TZ_LOCALES[tz] : undefined;
+        return getFmt(fmt, tz, targetLocale).format(zdt.epochMilliseconds);
+      }
+
+      let lastDateKey = 0;
+      let lastTzKey = "";
+      let lastFmt = "";
+      let lastMode = "";
+      const absPhrase = PHRASES_ABS[(Math.random() * PHRASES_ABS.length) | 0];
+      const relPhrase = PHRASES_REL[(Math.random() * PHRASES_REL.length) | 0];
+
+      const PREVIEW_ANIM = { duration: 220, easing: "ease-out" };
+      const PREVIEW_KEYFRAMES = [{ opacity: 0.6 }, { opacity: 1 }];
+      function updatePreviewText(newText, animate) {
+        if (previewEl.textContent === newText) return;
+        previewEl.textContent = newText;
+        if (!animate || reduceMotion) return;
+        for (const a of previewEl.getAnimations()) a.cancel();
+        previewEl.animate(PREVIEW_KEYFRAMES, PREVIEW_ANIM);
+      }
+
+      const activeTz = () => (state.tz !== "local" ? state.tz : undefined);
+
+      function paint(opts = {}) {
+        const zdt = readInstant();
+        if (!zdt) return;
+        const ms = zdt.epochMilliseconds;
+        const tz = activeTz();
+        const tzKey = tz || "";
+        const dateChanged = ms !== lastDateKey || opts.force;
+        const tzChanged = tzKey !== lastTzKey || opts.force;
+        const fmtChanged = state.fmt !== lastFmt || opts.force;
+
+        const rendered = render(state.fmt, zdt, tz);
+
+        const codeVal = `<t:${(ms / 1000) | 0}:${state.fmt}>`;
+        if (codeEl.value !== codeVal) codeEl.value = codeVal;
+
+        const mode = state.fmt === "R" ? "rel" : "abs";
+        if (mode !== lastMode) {
+          const phrase = mode === "rel" ? relPhrase : absPhrase;
+          phraseEl.textContent = phrase[0];
+          phraseTailEl.textContent = phrase[1];
+          
+          mainEl.style.setProperty("--fmt-mode", mode);
+          lastMode = mode;
         }
 
-        function paint() {
-          const date = readDate();
-          if (!date) return;
-          const unix = Math.floor(date.getTime() / 1e3),
-            tz = tzEl.value !== "local" ? tzEl.value : undefined,
-            rendered = render(selectedFmt, date, tz);
+        updatePreviewText(rendered, fmtChanged || tzChanged || dateChanged);
+        
+        tipDirty = true;
 
-          codeEl.value = "<t:" + unix + ":" + selectedFmt + ">";
-
-          const phrase = selectedFmt === "R" ? relPhrase : absPhrase;
-          if (phraseEl.firstChild.data !== phrase[0]) {
-            phraseEl.firstChild.data = phrase[0];
-            phraseTailEl.firstChild.data = phrase[1];
+        if (dateChanged || tzChanged) {
+          for (const [fmt, el] of exampleByFmt) {
+            el.textContent = render(fmt, zdt, tz);
           }
+        } else if (fmtChanged) {
+          
+          const sel = exampleByFmt.get(state.fmt);
+          if (sel) sel.textContent = rendered;
+        }
 
-          if (previewEl.textContent !== rendered) {
-            previewEl.textContent = rendered;
-            if (!reduceMotion) previewEl.animate(fadeFrames, fadeOpts);
-          }
+        updateSentAt(tz);
 
-          const tipText =
-            selectedFmt === "F" ? rendered : render("F", date, tz);
-          if (previewTipEl.textContent !== tipText) {
-            previewTipEl.textContent = tipText;
-          }
-
-          examples.forEach(function (el) {
-            const fmt = el.getAttribute("data-fmt");
-            el.textContent =
-              fmt === selectedFmt ? rendered : render(fmt, date, tz);
-          });
-
-          sentAtEl.textContent = getFmt("s", tz).format(new Date());
-
+        if (!copyTimeout) {
           copyBtn.classList.remove("copied");
           copyLabel.textContent = "Copy code";
         }
 
-        function resetToNow() {
-          const n = new Date(),
-            iso = new Date(n - n.getTimezoneOffset() * 6e4).toISOString();
-          dEl.value = iso.slice(0, 10);
-          hmEl.value = iso.slice(11, 19);
-          paint();
+        scheduleRelTick(zdt);
+
+        lastDateKey = ms;
+        lastTzKey = tzKey;
+        lastFmt = state.fmt;
+      }
+
+      function scheduleRelTick(zdt) {
+        clearTimeout(relTicker);
+        if (state.fmt !== "R") return;
+        const diffMs = Math.abs(zdt.epochMilliseconds - Date.now());
+        
+        const delay = diffMs < 60000 ? 1000 : 60000;
+        relTicker = setTimeout(() => {
+          if (state.fmt !== "R") return;
+          if (document.visibilityState !== "visible") {
+            scheduleRelTick(zdt);
+            return;
+          }
+          const z = readInstant();
+          if (!z) return;
+          const txt = relativeText(z);
+          
+          updatePreviewText(txt, false);
+          const sel = exampleByFmt.get("R");
+          if (sel) sel.textContent = txt;
+          scheduleRelTick(z);
+        }, delay);
+      }
+
+      function resetToNow() {
+        const { date, time } = nowLocalIsoParts();
+        dEl.value = date;
+        hmEl.value = time;
+        paint({ force: true });
+      }
+
+      async function doCopy() {
+        paint();
+        let ok = true;
+        try {
+          await navigator.clipboard.writeText(codeEl.value);
+        } catch {
+          ok = false;
+          codeEl.focus();
+          codeEl.select();
         }
+        copyBtn.classList.toggle("copied", ok);
+        copyLabel.textContent = ok ? "Copied!" : "Press Ctrl/Cmd+C";
+        clearTimeout(copyTimeout);
+        copyTimeout = setTimeout(() => {
+          copyTimeout = 0;
+          copyBtn.classList.remove("copied");
+          copyLabel.textContent = "Copy code";
+        }, 2000);
+      }
 
-        $("generator").addEventListener("change", function (ev) {
-          if (ev.target.name === "t") {
-            selectedFmt = ev.target.value;
-            try {
-              localStorage.setItem(STORE_KEY, selectedFmt);
-            } catch (_) {}
-          }
-          paint();
+      let paintScheduled = false;
+      let pendingOpts = null;
+      function schedulePaint(opts) {
+        
+        if (opts) pendingOpts = { ...pendingOpts, ...opts };
+        if (paintScheduled) return;
+        paintScheduled = true;
+        requestAnimationFrame(() => {
+          paintScheduled = false;
+          const o = pendingOpts || undefined;
+          pendingOpts = null;
+          paint(o);
         });
+      }
 
-        codeEl.addEventListener("focus", function () {
-          this.select();
-        });
-        resetBtn.addEventListener("click", resetToNow);
+      form.addEventListener("change", (ev) => {
+        const t = ev.target;
+        if (t.name === "t") {
+          state.fmt = t.value;
+          persistState();
+          announceFmt(t.value);
+        }
+        schedulePaint();
+      });
+      form.addEventListener("input", (ev) => {
+        const t = ev.target;
+        if (t === dEl || t === hmEl) schedulePaint();
+      });
+      form.addEventListener("submit", (ev) => ev.preventDefault());
 
-        copyBtn.addEventListener("click", async function () {
-          paint();
-          let ok = true;
-          try {
-            await navigator.clipboard.writeText(codeEl.value);
-          } catch (_) {
-            ok = false;
-            codeEl.focus();
-            codeEl.select();
-          }
-          if (ok) {
-            copyBtn.classList.add("copied");
-            copyLabel.textContent = "Copied!";
-          } else {
-            copyLabel.textContent = "Press Ctrl/Cmd+C";
-          }
-          clearTimeout(copyTimeout);
-          copyTimeout = setTimeout(function () {
-            copyBtn.classList.remove("copied");
-            copyLabel.textContent = "Copy code";
-          }, 2e3);
-        });
+      tzEl.addEventListener("change", () => {
+        state.tz = tzEl.value;
+        persistState();
+        schedulePaint({ force: true });
+      });
 
-        const savedRadio = $("fmt-" + selectedFmt);
-        if (savedRadio) savedRadio.checked = true;
+      codeEl.addEventListener("focus", function () {
+        this.select();
+      });
+      codeEl.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter") {
+          ev.preventDefault();
+          doCopy();
+        }
+      });
 
-        resetToNow();
-      })();
+      resetBtn.addEventListener("click", resetToNow);
+      copyBtn.addEventListener("click", doCopy);
+
+      function refreshTooltip() {
+        if (!tipDirty) return;
+        const z = readInstant();
+        if (!z) return;
+        const tipText = render("F", z, activeTz());
+        if (previewTipEl.textContent !== tipText) previewTipEl.textContent = tipText;
+        tipDirty = false;
+      }
+      chipEl.addEventListener("pointerenter", refreshTooltip);
+      chipEl.addEventListener("focus", refreshTooltip);
+      
+      chipEl.addEventListener("keydown", (ev) => {
+        if (ev.key === "Escape") chipEl.blur();
+      });
+
+      const statusEl = document.getElementById("a11y-status");
+      const FMT_NAMES = {
+        t: "Short Time", T: "Long Time",
+        d: "Short Date", D: "Long Date",
+        f: "Long Date + Time", F: "Full Date + Time",
+        R: "Relative",
+      };
+      let announceTimer;
+      function announceFmt(fmt) {
+        clearTimeout(announceTimer);
+        
+        announceTimer = setTimeout(() => {
+          statusEl.textContent = `Format: ${FMT_NAMES[fmt]}`;
+        }, 150);
+      }
+
+      const KBD_IGNORE = new Set(["INPUT", "SELECT", "TEXTAREA"]);
+      document.addEventListener("keydown", (ev) => {
+        if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
+        if (KBD_IGNORE.has(ev.target?.tagName)) return;
+        const k = ev.key === "r" ? "R" : ev.key;
+        const radio = radioByFmt.get(k);
+        if (radio) {
+          radio.checked = true;
+          state.fmt = k;
+          persistState();
+          schedulePaint();
+          announceFmt(k);
+          ev.preventDefault();
+          return;
+        }
+        if (ev.key === "n" || ev.key === "N") {
+          resetToNow();
+          ev.preventDefault();
+        }
+      });
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden") persistNow();
+        else schedulePaint({ force: true });
+      });
+
+      function updateSentAt(tz) {
+        sentAtEl.textContent = getFmt("s", tz).format(Date.now());
+      }
+      
+      function tickClock() {
+        if (document.visibilityState === "visible") updateSentAt(activeTz());
+        setTimeout(tickClock, 60_000 - (Date.now() % 60_000));
+      }
+      setTimeout(tickClock, 60_000 - (Date.now() % 60_000));
+
+      loadState();
+      const savedRadio = radioByFmt.get(state.fmt);
+      if (savedRadio) savedRadio.checked = true;
+      tzEl.value = state.tz;
+      
+      form.dataset.ready = "";
+      
+      if (state.tz !== "local") {
+        const l = TZ_LOCALES[state.tz];
+        getFmt(state.fmt, state.tz, l);
+        getFmt("F", state.tz, l);
+        getFmt("s", state.tz);
+      }
+      resetToNow();
     </script>
-    <noscript
-      ><div
-        style="
-          max-width: 38rem;
-          margin: 1rem auto;
-          padding: 1rem;
-          background: #2b2d31;
-          border: 1px solid #3b3d43;
-          border-radius: 10px;
-          text-align: center;
-        "
-      >
-        Enable JavaScript to generate timestamp codes.
-      </div></noscript
-    >
   </body>
 </html>
