@@ -21,25 +21,67 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - name: Install build tools
+        run: npm install --no-save lightningcss-cli html-minifier-terser
+
       - name: Build minified dist/
         run: |
+          set -euo pipefail
           mkdir -p dist
 
           cp -r robots.txt sitemap.xml favicon.ico dist/ 2>/dev/null || true
 
-          npx --yes html-minifier-terser index.html \
+          # 1) Extract inline <style>...</style> into a temp file
+          node -e '
+            const fs = require("fs");
+            const html = fs.readFileSync("index.html", "utf8");
+            const m = html.match(/<style>([\s\S]*?)<\/style>/);
+            if (!m) { fs.writeFileSync("_extracted.css", ""); process.exit(0); }
+            fs.writeFileSync("_extracted.css", m[1]);
+          '
+
+          # 2) Minify + flatten CSS Nesting with lightningcss (Baseline targets)
+          npx --yes lightningcss \
+            --minify \
+            --targets ">= 0.25%" \
+            --nesting \
+            _extracted.css \
+            -o _extracted.min.css
+
+          # 3) Re-inline the minified CSS back into index.html
+          node -e '
+            const fs = require("fs");
+            const html = fs.readFileSync("index.html", "utf8");
+            const css = fs.readFileSync("_extracted.min.css", "utf8");
+            const out = html.replace(
+              /<style>[\s\S]*?<\/style>/,
+              () => "<style>" + css + "</style>"
+            );
+            fs.writeFileSync("_prebuilt.html", out);
+          '
+
+          # 4) Minify HTML + JS only (CSS already minified, disable to preserve it)
+          npx --yes html-minifier-terser _prebuilt.html \
             --collapse-whitespace \
             --collapse-boolean-attributes \
             --remove-comments \
             --remove-redundant-attributes \
             --remove-empty-attributes \
             --use-short-doctype \
-            --minify-css true \
+            --minify-css false \
             --minify-js true \
             -o dist/index.html
+
+          # Cleanup temp files
+          rm -f _extracted.css _extracted.min.css _prebuilt.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
