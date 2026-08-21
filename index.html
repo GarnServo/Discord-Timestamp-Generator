@@ -211,6 +211,23 @@
         text-align: center;
         margin-bottom: 2.25rem;
       }
+      @media not (prefers-reduced-motion: reduce) {
+        header.hero,
+        .card,
+        .faq,
+        footer {
+          animation: riseIn 0.45s ease-out both;
+        }
+        .card {
+          animation-delay: 0.08s;
+        }
+        .faq {
+          animation-delay: 0.16s;
+        }
+        footer {
+          animation-delay: 0.24s;
+        }
+      }
       .eyebrow {
         display: inline-flex;
         align-items: center;
@@ -560,6 +577,9 @@
         }
       }
       .btn-primary {
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -572,10 +592,28 @@
         &:hover {
           background: var(--brand-hover);
         }
+
+        &::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            105deg,
+            transparent 35%,
+            rgb(255 255 255 / 0.18) 50%,
+            transparent 65%
+          );
+          translate: -125% 0;
+          pointer-events: none;
+        }
       }
       #copy {
         &.copied {
           background: var(--success);
+
+          &::after {
+            animation: sweep 0.5s ease-out;
+          }
 
           & .clip {
             display: none;
@@ -743,6 +781,24 @@
         }
         50% {
           opacity: 0.35;
+        }
+      }
+      @keyframes riseIn {
+        from {
+          opacity: 0;
+          transform: translateY(0.5rem);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes sweep {
+        from {
+          translate: -125% 0;
+        }
+        to {
+          translate: 125% 0;
         }
       }
       @container shell (max-width: 32rem) {
