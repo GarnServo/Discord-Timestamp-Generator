@@ -47,11 +47,10 @@ jobs:
             fs.writeFileSync("_extracted.css", m ? m[1] : "");
           '
 
-          # Minify nesting for browsers that support CSS Nesting natively.
+          # Minify while preserving native CSS Nesting syntax.
           npx --yes lightningcss \
             --minify \
             --targets "chrome >= 112, firefox >= 117, safari >= 16.5, edge >= 112" \
-            --nesting \
             _extracted.css \
             -o _extracted.min.css
 
@@ -77,6 +76,7 @@ jobs:
             --minify-js true \
             -o dist/index.html
 
+          du -h dist/index.html
           rm -f _extracted.css _extracted.min.css _prebuilt.html
 
       - name: Upload artifact
