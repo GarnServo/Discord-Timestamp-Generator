@@ -885,93 +885,7 @@
         </p>
         <fieldset>
           <legend>Format</legend>
-          <div class="pills" role="presentation">
-            <label class="pill" for="fmt-t">
-              <input
-                class="pill-input"
-                type="radio"
-                name="t"
-                id="fmt-t"
-                value="t"
-                aria-keyshortcuts="t"
-              />
-              <span class="pill-label">Short Time</span>
-              <span class="pill-example" data-fmt="t" aria-hidden="true"></span>
-            </label>
-            <label class="pill" for="fmt-T">
-              <input
-                class="pill-input"
-                type="radio"
-                name="t"
-                id="fmt-T"
-                value="T"
-                aria-keyshortcuts="Shift+T"
-              />
-              <span class="pill-label">Long Time</span>
-              <span class="pill-example" data-fmt="T" aria-hidden="true"></span>
-            </label>
-            <label class="pill" for="fmt-d">
-              <input
-                class="pill-input"
-                type="radio"
-                name="t"
-                id="fmt-d"
-                value="d"
-                aria-keyshortcuts="d"
-              />
-              <span class="pill-label">Short Date</span>
-              <span class="pill-example" data-fmt="d" aria-hidden="true"></span>
-            </label>
-            <label class="pill" for="fmt-D">
-              <input
-                class="pill-input"
-                type="radio"
-                name="t"
-                id="fmt-D"
-                value="D"
-                checked
-                aria-keyshortcuts="Shift+D"
-              />
-              <span class="pill-label">Long Date</span>
-              <span class="pill-example" data-fmt="D" aria-hidden="true"></span>
-            </label>
-            <label class="pill" for="fmt-f">
-              <input
-                class="pill-input"
-                type="radio"
-                name="t"
-                id="fmt-f"
-                value="f"
-                aria-keyshortcuts="f"
-              />
-              <span class="pill-label">Long Date + Time</span>
-              <span class="pill-example" data-fmt="f" aria-hidden="true"></span>
-            </label>
-            <label class="pill" for="fmt-F">
-              <input
-                class="pill-input"
-                type="radio"
-                name="t"
-                id="fmt-F"
-                value="F"
-                aria-keyshortcuts="Shift+F"
-              />
-              <span class="pill-label">Full Date + Time</span>
-              <span class="pill-example" data-fmt="F" aria-hidden="true"></span>
-            </label>
-            <label class="pill" for="fmt-R">
-              <input
-                class="pill-input"
-                type="radio"
-                name="t"
-                id="fmt-R"
-                value="R"
-                aria-keyshortcuts="r"
-              />
-              <span class="pill-label">Relative</span>
-              <span class="pill-example" data-fmt="R" aria-hidden="true"></span>
-            </label>
-          </div>
+          <div class="pills" id="formats" role="presentation"></div>
         </fieldset>
         <div class="output-row">
           <label for="code" class="sr-only">Generated timestamp code</label>
@@ -1117,6 +1031,20 @@
       const sentAtEl = document.getElementById("sentAt");
       const tzEl = document.getElementById("tz");
       const mainEl = document.getElementById("main");
+      const formatsEl = document.getElementById("formats");
+      const FORMAT_OPTIONS = [
+        ["t", "Short Time", "t"],
+        ["T", "Long Time", "Shift+T"],
+        ["d", "Short Date", "d"],
+        ["D", "Long Date", "Shift+D"],
+        ["f", "Long Date + Time", "f"],
+        ["F", "Full Date + Time", "Shift+F"],
+        ["R", "Relative", "r"],
+      ];
+      formatsEl.innerHTML = FORMAT_OPTIONS.map(
+        ([fmt, name, shortcut]) =>
+          `<label class="pill" for="fmt-${fmt}"><input class="pill-input" type="radio" name="t" id="fmt-${fmt}" value="${fmt}" aria-keyshortcuts="${shortcut}"${fmt === "D" ? " checked" : ""}><span class="pill-label">${name}</span><span class="pill-example" data-fmt="${fmt}" aria-hidden="true"></span></label>`,
+      ).join("");
       const examples = document.querySelectorAll(".pill-example");
       const exampleByFmt = new Map(
         Array.from(examples, (el) => [el.dataset.fmt, el]),
