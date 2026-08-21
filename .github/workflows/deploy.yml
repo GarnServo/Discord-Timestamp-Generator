@@ -50,7 +50,7 @@ jobs:
           # Minify while preserving native CSS Nesting syntax.
           npx --yes lightningcss \
             --minify \
-            --targets "chrome >= 112, firefox >= 117, safari >= 16.5, edge >= 112" \
+            --targets "chrome >= 123, firefox >= 120, safari >= 17.5, edge >= 123" \
             _extracted.css \
             -o _extracted.min.css
 
