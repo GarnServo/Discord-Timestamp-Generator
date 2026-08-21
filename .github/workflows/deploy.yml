@@ -50,7 +50,6 @@ jobs:
           # Minify while preserving native CSS Nesting syntax.
           npx --yes lightningcss \
             --minify \
-            --targets "chrome >= 123, firefox >= 120, safari >= 17.5, edge >= 123" \
             _extracted.css \
             -o _extracted.min.css
 
@@ -71,12 +70,15 @@ jobs:
             --remove-comments \
             --remove-redundant-attributes \
             --remove-empty-attributes \
+            --remove-attribute-quotes \
+            --remove-optional-tags \
             --use-short-doctype \
             --minify-css false \
             --minify-js true \
             -o dist/index.html
 
           du -h dist/index.html
+          gzip -9 -c dist/index.html | wc -c
           rm -f _extracted.css _extracted.min.css _prebuilt.html
 
       - name: Upload artifact

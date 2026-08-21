@@ -1365,7 +1365,7 @@
         relTicker = setTimeout(() => {
           if (state.fmt !== "R") return;
           if (document.visibilityState !== "visible") {
-            scheduleRelTick(zdt);
+            scheduleRelTick(zdt, instant);
             return;
           }
           const z = readInstant();
