@@ -30,7 +30,7 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Install build tools
-        run: npm install --no-save html-minifier-terser
+        run: npm install --no-save lightningcss-cli html-minifier-terser
 
       - name: Build minified dist/
         run: |
@@ -39,19 +39,45 @@ jobs:
 
           cp -r robots.txt sitemap.xml favicon.ico dist/ 2>/dev/null || true
 
-          # Minify HTML, native CSS nesting, and inline JavaScript in one pass.
-          npx --yes html-minifier-terser index.html \
+          # Extract CSS so a CSS-aware parser handles native nesting.
+          node -e '
+            const fs = require("fs");
+            const html = fs.readFileSync("index.html", "utf8");
+            const m = html.match(/<style>([\s\S]*?)<\/style>/);
+            fs.writeFileSync("_extracted.css", m ? m[1] : "");
+          '
+
+          # Minify nesting for browsers that support CSS Nesting natively.
+          npx --yes lightningcss \
+            --minify \
+            --targets "chrome >= 112, firefox >= 117, safari >= 16.5, edge >= 112" \
+            --nesting \
+            _extracted.css \
+            -o _extracted.min.css
+
+          node -e '
+            const fs = require("fs");
+            const html = fs.readFileSync("index.html", "utf8");
+            const css = fs.readFileSync("_extracted.min.css", "utf8");
+            fs.writeFileSync(
+              "_prebuilt.html",
+              html.replace(/<style>[\s\S]*?<\/style>/, () => "<style>" + css + "</style>"),
+            );
+          '
+
+          # Minify HTML and inline JavaScript without reparsing CSS.
+          npx --yes html-minifier-terser _prebuilt.html \
             --collapse-whitespace \
             --collapse-boolean-attributes \
             --remove-comments \
             --remove-redundant-attributes \
             --remove-empty-attributes \
-            --remove-attribute-quotes \
-            --remove-optional-tags \
             --use-short-doctype \
-            --minify-css true \
+            --minify-css false \
             --minify-js true \
             -o dist/index.html
+
+          rm -f _extracted.css _extracted.min.css _prebuilt.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
