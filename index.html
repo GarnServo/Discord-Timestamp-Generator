@@ -177,7 +177,7 @@
         container-name: shell;
         --fmt-mode: abs;
       }
-      
+
       @container shell style(--fmt-mode: rel) {
         .ts-chip {
           background: color-mix(in srgb, var(--success) 18%, transparent);
@@ -361,7 +361,7 @@
           }
         }
       }
-      
+
       [data-ready] .pill:has(input:checked) {
         background: var(--brand-soft-strong);
         border-color: var(--brand);
@@ -583,14 +583,10 @@
         &::after {
           content: "";
           position: absolute;
-          inset: 0;
-          background: linear-gradient(
-            105deg,
-            transparent 35%,
-            rgb(255 255 255 / 0.18) 50%,
-            transparent 65%
-          );
-          translate: -125% 0;
+          inset: -50% auto;
+          width: 16%;
+          background: rgb(255 255 255 / 0.18);
+          transform: translateX(-800%) skewX(-18deg);
           pointer-events: none;
         }
       }
@@ -600,6 +596,7 @@
 
           &::after {
             animation: sweep 0.5s ease-out;
+            will-change: transform;
           }
 
           & .clip {
@@ -782,10 +779,10 @@
       }
       @keyframes sweep {
         from {
-          translate: -125% 0;
+          transform: translateX(-800%) skewX(-18deg);
         }
         to {
-          translate: 125% 0;
+          transform: translateX(800%) skewX(-18deg);
         }
       }
       @container shell (max-width: 32rem) {
@@ -899,11 +896,7 @@
             inputmode="none"
             aria-live="polite"
           />
-          <button
-            type="button"
-            id="copy"
-            class="btn-primary"
-          >
+          <button type="button" id="copy" class="btn-primary">
             <span class="copy-icon clip" aria-hidden="true"></span>
             <span class="copy-icon check" aria-hidden="true"></span>
             <span class="copy-label" id="copy-label" role="status"
@@ -911,7 +904,11 @@
             >
           </button>
         </div>
-        <div class="preview-block" role="group" aria-labelledby="preview-heading">
+        <div
+          class="preview-block"
+          role="group"
+          aria-labelledby="preview-heading"
+        >
           <h2 id="preview-heading" class="sr-only">Preview</h2>
           <div class="preview-header">
             <span class="preview-label" aria-hidden="true">Preview</span>
@@ -947,13 +944,10 @@
                   aria-describedby="previewTip"
                 >
                   <span id="previewText">…</span>
-                  <span
-                    id="previewTip"
-                    class="ts-chip-tip"
-                    role="tooltip"
+                  <span id="previewTip" class="ts-chip-tip" role="tooltip"
                     >…</span
-                  >
-                </span><span id="phraseTail">.</span>
+                  > </span
+                ><span id="phraseTail">.</span>
               </p>
             </div>
           </div>
@@ -1009,9 +1003,16 @@
       </footer>
     </main>
     <noscript>
-      <div class="noscript-msg">Enable JavaScript to generate timestamp codes.</div>
+      <div class="noscript-msg">
+        Enable JavaScript to generate timestamp codes.
+      </div>
     </noscript>
-    <div id="a11y-status" class="sr-only" role="status" aria-live="polite"></div>
+    <div
+      id="a11y-status"
+      class="sr-only"
+      role="status"
+      aria-live="polite"
+    ></div>
     <script type="module">
       "use strict";
 
@@ -1049,7 +1050,7 @@
       const exampleByFmt = new Map(
         Array.from(examples, (el) => [el.dataset.fmt, el]),
       );
-      
+
       const radioByFmt = new Map(
         Array.from(examples, (el) => [
           el.dataset.fmt,
@@ -1095,7 +1096,7 @@
         ["That'd be", "."],
         ["So, about", "."],
       ];
-      
+
       const TZ_LOCALES = {
         "America/Los_Angeles": "en-US",
         "America/New_York": "en-US",
@@ -1106,7 +1107,6 @@
         "Australia/Sydney": "en-AU",
         UTC: "en",
       };
-      
 
       const state = {
         fmt: "D",
@@ -1136,13 +1136,13 @@
           localStorage.setItem(STORE_KEY, JSON.stringify(state));
         } catch {}
       }
-      
+
       addEventListener("pagehide", persistNow);
 
       const fmtCache = new Map();
       function getFmt(key, tz, localeOverride) {
         const l = localeOverride || locale;
-        
+
         const cacheKey =
           l === locale ? `${key}|${tz || ""}` : `${l}|${key}|${tz || ""}`;
         let f = fmtCache.get(cacheKey);
@@ -1181,9 +1181,22 @@
         };
       }
 
-      function relativeText(zdt, now = Temporal.Now.zonedDateTimeISO(LOCAL_TZ)) {
-        const d = now.until(zdt, { largestUnit: "years", smallestUnit: "seconds" });
-        for (const unit of ["years", "months", "days", "hours", "minutes", "seconds"]) {
+      function relativeText(
+        zdt,
+        now = Temporal.Now.zonedDateTimeISO(LOCAL_TZ),
+      ) {
+        const d = now.until(zdt, {
+          largestUnit: "years",
+          smallestUnit: "seconds",
+        });
+        for (const unit of [
+          "years",
+          "months",
+          "days",
+          "hours",
+          "minutes",
+          "seconds",
+        ]) {
           if (d[unit] !== 0 || unit === "seconds") {
             return getFmt("R").format(d[unit], unit);
           }
@@ -1238,13 +1251,13 @@
           const phrase = mode === "rel" ? relPhrase : absPhrase;
           phraseEl.textContent = phrase[0];
           phraseTailEl.textContent = phrase[1];
-          
+
           mainEl.style.setProperty("--fmt-mode", mode);
           lastMode = mode;
         }
 
         updatePreviewText(rendered, fmtChanged || tzChanged || dateChanged);
-        
+
         tipDirty = true;
 
         if (dateChanged || tzChanged) {
@@ -1252,7 +1265,6 @@
             el.textContent = render(fmt, zdt, tz, now);
           }
         } else if (fmtChanged) {
-          
           const sel = exampleByFmt.get(state.fmt);
           if (sel) sel.textContent = rendered;
         }
@@ -1274,8 +1286,10 @@
       function scheduleRelTick(zdt, instant) {
         clearTimeout(relTicker);
         if (state.fmt !== "R") return;
-        const diffMs = Math.abs(zdt.epochMilliseconds - instant.epochMilliseconds);
-        
+        const diffMs = Math.abs(
+          zdt.epochMilliseconds - instant.epochMilliseconds,
+        );
+
         const delay = diffMs < 60000 ? 1000 : 60000;
         relTicker = setTimeout(() => {
           if (state.fmt !== "R") return;
@@ -1286,7 +1300,7 @@
           const z = readInstant();
           if (!z) return;
           const txt = relativeText(z);
-          
+
           updatePreviewText(txt, false);
           const sel = exampleByFmt.get("R");
           if (sel) sel.textContent = txt;
@@ -1324,7 +1338,6 @@
       let paintScheduled = false;
       let pendingOpts = null;
       function schedulePaint(opts) {
-        
         if (opts) pendingOpts = { ...pendingOpts, ...opts };
         if (paintScheduled) return;
         paintScheduled = true;
@@ -1375,27 +1388,31 @@
         const z = readInstant();
         if (!z) return;
         const tipText = render("F", z, activeTz());
-        if (previewTipEl.textContent !== tipText) previewTipEl.textContent = tipText;
+        if (previewTipEl.textContent !== tipText)
+          previewTipEl.textContent = tipText;
         tipDirty = false;
       }
       chipEl.addEventListener("pointerenter", refreshTooltip);
       chipEl.addEventListener("focus", refreshTooltip);
-      
+
       chipEl.addEventListener("keydown", (ev) => {
         if (ev.key === "Escape") chipEl.blur();
       });
 
       const statusEl = document.getElementById("a11y-status");
       const FMT_NAMES = {
-        t: "Short Time", T: "Long Time",
-        d: "Short Date", D: "Long Date",
-        f: "Long Date + Time", F: "Full Date + Time",
+        t: "Short Time",
+        T: "Long Time",
+        d: "Short Date",
+        D: "Long Date",
+        f: "Long Date + Time",
+        F: "Full Date + Time",
         R: "Relative",
       };
       let announceTimer;
       function announceFmt(fmt) {
         clearTimeout(announceTimer);
-        
+
         announceTimer = setTimeout(() => {
           statusEl.textContent = `Format: ${FMT_NAMES[fmt]}`;
         }, 150);
@@ -1428,9 +1445,11 @@
       });
 
       function updateSentAt(tz, instant = Temporal.Now.instant()) {
-        sentAtEl.textContent = getFmt("s", tz).format(instant.epochMilliseconds);
+        sentAtEl.textContent = getFmt("s", tz).format(
+          instant.epochMilliseconds,
+        );
       }
-      
+
       function tickClock() {
         if (document.visibilityState === "visible") updateSentAt(activeTz());
         const now = Temporal.Now.instant().epochMilliseconds;
@@ -1443,9 +1462,9 @@
       const savedRadio = radioByFmt.get(state.fmt);
       if (savedRadio) savedRadio.checked = true;
       tzEl.value = state.tz;
-      
+
       form.dataset.ready = "";
-      
+
       if (state.tz !== "local") {
         const l = TZ_LOCALES[state.tz];
         getFmt(state.fmt, state.tz, l);
