@@ -1136,14 +1136,6 @@
         UTC: "en",
       };
       
-      const REL_UNITS = [
-        [31536000, "years"],
-        [2592000, "months"],
-        [86400, "days"],
-        [3600, "hours"],
-        [60, "minutes"],
-        [1, "seconds"],
-      ];
 
       const state = {
         fmt: "D",
@@ -1218,15 +1210,13 @@
       }
 
       function relativeText(zdt) {
-        const s = Math.round((zdt.epochMilliseconds - Date.now()) / 1000);
-        const a = Math.abs(s);
-        for (let i = 0; i < REL_UNITS.length; i++) {
-          const [div, unit] = REL_UNITS[i];
-          if (a >= div || unit === "seconds") {
-            return getFmt("R").format(Math.round(s / div), unit);
+        const now = Temporal.Now.zonedDateTimeISO(LOCAL_TZ);
+        const d = now.until(zdt, { largestUnit: "years", smallestUnit: "seconds" });
+        for (const unit of ["years", "months", "days", "hours", "minutes", "seconds"]) {
+          if (d[unit] !== 0 || unit === "seconds") {
+            return getFmt("R").format(d[unit], unit);
           }
         }
-        return "";
       }
 
       function render(fmt, zdt, tz) {
